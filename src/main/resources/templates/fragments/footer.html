@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ================================================================ FOOTER -->
+<footer class="chh-footer" th:fragment="footer">
+    <div class="chh-footer__top">
+        <div class="chh-container">
+            <div class="chh-footer__grid">
+
+                <!-- Brand column -->
+                <div class="chh-footer__brand">
+                    <a class="chh-brand" th:href="@{/}">
+                        <span class="chh-brand__mark">
+                            <svg><use href="/img/icons/sprite.svg#heart"></use></svg>
+                        </span>
+                        <span class="chh-brand__text">
+                            <span class="chh-brand__name">Chinche Hospital</span>
+                            <span class="chh-brand__name-mr">चींचे हॉस्पिटल</span>
+                            <span class="chh-brand__sub" th:text="#{site.city}">Katol, Nagpur</span>
+                        </span>
+                    </a>
+                    <p class="chh-footer__about" th:text="#{site.tagline}">
+                        Multi-speciality care for Katol &amp; Vidarbha since 1998.
+                    </p>
+
+                    <ul class="chh-footer__contact mt-3">
+                        <li>
+                            <svg><use href="/img/icons/sprite.svg#pin"></use></svg>
+                            <span th:utext="${contact.addressLine1} + '<br>' + ${contact.addressLine2} + '<br>'
+                                          + #{site.city} + ' — ' + ${contact.pincode} + ', ' + ${contact.state}">
+                                Address
+                            </span>
+                        </li>
+                        <li>
+                            <svg><use href="/img/icons/sprite.svg#phone"></use></svg>
+                            <span>
+                                <a th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}" th:text="${contact.phone}">phone</a><br>
+                                <span class="chh-tiny" th:text="#{topbar.emergency}">Emergency</span>:
+                                <a th:href="'tel:108'" th:text="${contact.emergency}">108</a>
+                            </span>
+                        </li>
+                        <li>
+                            <svg><use href="/img/icons/sprite.svg#mail"></use></svg>
+                            <a th:href="'mailto:' + ${contact.email}" th:text="${contact.email}">email</a>
+                        </li>
+                        <li>
+                            <svg><use href="/img/icons/sprite.svg#clock"></use></svg>
+                            <span>OPD 8:00 AM – 8:00 PM<br><span th:text="#{topbar.emergency}">Emergency</span> 24×7</span>
+                        </li>
+                    </ul>
+
+                    <div class="chh-accredit">
+                        <span><svg><use href="/img/icons/sprite.svg#accreditation"></use></svg> NABH</span>
+                        <span><svg><use href="/img/icons/sprite.svg#lab-certified"></use></svg> NABL</span>
+                        <span><svg><use href="/img/icons/sprite.svg#government"></use></svg> Jan Arogya</span>
+                        <span><svg><use href="/img/icons/sprite.svg#leaf"></use></svg> Green OT</span>
+                    </div>
+
+                    <div class="chh-footer__socials">
+                        <a href="#" aria-label="Facebook"><svg><use href="/img/icons/sprite.svg#facebook"></use></svg></a>
+                        <a href="#" aria-label="Instagram"><svg><use href="/img/icons/sprite.svg#instagram"></use></svg></a>
+                        <a href="#" aria-label="YouTube"><svg><use href="/img/icons/sprite.svg#youtube"></use></svg></a>
+                        <a href="#" aria-label="LinkedIn"><svg><use href="/img/icons/sprite.svg#linkedin"></use></svg></a>
+                        <a href="#" aria-label="X"><svg><use href="/img/icons/sprite.svg#x-social"></use></svg></a>
+                        <a th:href="'https://wa.me/919422100108'" aria-label="WhatsApp" rel="noopener">
+                            <svg><use href="/img/icons/sprite.svg#whatsapp"></use></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Clinical -->
+                <div>
+                    <div class="chh-footer__heading" th:text="#{footer.clinical}">Clinical</div>
+                    <ul class="chh-footer__list">
+                        <li th:each="s, st : ${navSpecialities}" th:if="${st.index < 10}">
+                            <a th:href="@{'/specialities/' + ${s.slug}}"
+                               th:text="${isMarathi} and ${s.nameMr != null} ? ${s.nameMr} : ${s.name}">Speciality</a>
+                        </li>
+                        <li><a th:href="@{/specialities}" th:text="#{section.viewall}">View all</a></li>
+                        <li><a th:href="@{/procedures}" th:text="#{nav.procedures}">Treatments</a></li>
+                        <li><a th:href="@{/doctors}" th:text="#{nav.doctors}">Find a doctor</a></li>
+                        <li><a th:href="@{/emergency}" th:text="#{nav.emergency}">Emergency</a></li>
+                    </ul>
+                </div>
+
+                <!-- Patient services -->
+                <div>
+                    <div class="chh-footer__heading" th:text="#{footer.patient}">Patient services</div>
+                    <ul class="chh-footer__list">
+                        <li><a th:href="@{/book}" th:text="#{nav.book}">Book appointment</a></li>
+                        <li><a th:href="@{/track}" th:text="#{topbar.track}">Track a booking</a></li>
+                        <li><a th:href="@{/health-packages}" th:text="#{nav.packages}">Health check-ups</a></li>
+                        <li><a th:href="@{/lab-tests}" th:text="#{nav.lab}">Lab tests</a></li>
+                        <li><a th:href="@{/reports}" th:text="#{footer.patient} + ' · Reports'">Reports</a></li>
+                        <li><a th:href="@{/insurance}" th:text="#{footer.patient} + ' · Insurance'">Insurance</a></li>
+                        <li><a th:href="@{/blood-bank}" th:text="#{footer.patient} + ' · Blood bank'">Blood bank</a></li>
+                        <li><a th:href="@{/careers}" th:text="#{footer.patient} + ' · Careers'">Careers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <div class="chh-footer__heading" th:text="#{footer.connect}">Connect</div>
+                    <ul class="chh-footer__list">
+                        <li><a th:href="@{/about}" th:text="#{nav.about}">About us</a></li>
+                        <li><a th:href="@{/locations}" th:text="#{nav.locations}">Our centres</a></li>
+                        <li><a th:href="@{/blogs}" th:text="#{nav.blogs}">Health blogs</a></li>
+                        <li><a th:href="@{/announcements}" th:text="#{nav.news}">Updates</a></li>
+                        <li><a th:href="@{/patient-stories}" th:text="#{nav.stories}">Patient stories</a></li>
+                        <li><a th:href="@{/contact}" th:text="#{nav.contact}">Contact</a></li>
+                        <li><a th:href="@{/sitemap}" th:text="#{footer.about} + ' · Sitemap'">Sitemap</a></li>
+                        <li><a th:href="@{/admin/login}" th:text="#{footer.about} + ' · Staff login'">Staff login</a></li>
+                    </ul>
+
+                    <div class="chh-footer__heading mt-4" th:text="#{footer.newsletter}">Health updates by email</div>
+                    <form class="chh-newsletter" id="chhNewsletter">
+                        <input type="email" required th:placeholder="#{footer.newsletter.placeholder}"
+                               th:attr="aria-label=#{footer.newsletter}">
+                        <button class="chh-btn chh-btn--accent chh-btn--sm" type="submit"
+                                th:text="#{footer.newsletter.cta}">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chh-footer__bottom">
+        <div class="chh-container">
+            <div class="chh-footer__bottom-inner">
+                <div>
+                    © <span th:text="${#temporals.year(#temporals.createNow())}">2026</span>
+                    Chinche Hospital, <span th:text="#{site.city}">Katol</span>.
+                    <span th:text="#{footer.rights}">All rights reserved.</span>
+                    <span class="chh-tiny" style="opacity:.6">v<span th:text="${appVersion}">1.0.0</span></span>
+                </div>
+                <div class="chh-footer__legal">
+                    <a th:href="@{/contact}" th:text="#{nav.contact}">Contact</a>
+                    <a th:href="@{/sitemap}" th:text="#{footer.about} + ' · Sitemap'">Sitemap</a>
+                    <a href="#" th:text="#{footer.rights}">Privacy</a>
+                    <a href="#" th:text="#{footer.rights}">Terms</a>
+                </div>
+            </div>
+            <p class="chh-footer__disclaimer" th:text="#{footer.disclaimer}">Medical disclaimer.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- ======================================================= ICON SPRITE EMBED
+     Inlined once per page so <use href="#id"> works without an extra request
+     and without CORS issues when the sprite is cached cross-origin.        -->
+<th:block th:fragment="sprite">
+    <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+        <defs>
+            <symbol id="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.4A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 2.6C19 15.6 12 20 12 20Z"/></symbol>
+            <symbol id="arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 12h14.2M13.4 6.6 18.8 12l-5.4 5.4"/></symbol>
+            <symbol id="star" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.6 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 10l6.1-.9Z"/></symbol>
+        </defs>
+    </svg>
+</th:block>
+
+</body>
+</html>

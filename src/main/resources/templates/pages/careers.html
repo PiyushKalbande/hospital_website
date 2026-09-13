@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Careers</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Work with us','Careers at Chinche Hospital','करियर',
+        'Nursing, technician, pharmacy and administrative roles across our four centres in Katol taluka.',
+        'परिचारिका, तंत्रज्ञ, औषधनिर्माण व प्रशासकीय पदे.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3">
+                <div class="chh-card" th:each="role : ${ {'Staff Nurse (GNM/BSc)','ICU Nurse','Lab Technician','Radiology Technician','Pharmacist','Ward Boy / Attendant','Reception Executive','Physiotherapist'} }">
+                    <div class="chh-card__body">
+                        <span class="chh-icon"><svg><use href="/img/icons/sprite.svg#career"></use></svg></span>
+                        <h3 class="chh-h4" th:text="${role}">Role</h3>
+                        <p class="chh-small chh-muted mb-0">Katol / Narkhed / Saoner · Full time</p>
+                    </div>
+                    <div class="chh-card__foot">
+                        <a class="chh-btn chh-btn--outline chh-btn--sm chh-btn--block" th:href="@{/contact(type='CAREER')}">Apply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="chh-alert chh-alert--info mt-4">
+                <svg><use href="/img/icons/sprite.svg#mail"></use></svg>
+                <span>Send your résumé to <a th:href="'mailto:' + ${contact.email}" th:text="${contact.email}">email</a> with the role in the subject line.</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

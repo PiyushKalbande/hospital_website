@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="e1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".2"/><stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="200" r="150" stroke="#ffffff" stroke-opacity=".16" stroke-width="1.5"/>
+  <circle cx="300" cy="200" r="112" stroke="#ffffff" stroke-opacity=".22" stroke-width="1.5"/>
+  <circle cx="300" cy="200" r="76" fill="url(#e1)" stroke="#ffffff" stroke-opacity=".4" stroke-width="2"/>
+  <!-- heartbeat line -->
+  <path d="M40 268h96l22-58 30 108 26-70 18 40 24-20h204" stroke="#F6CE8B" stroke-width="4.5"
+        stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <!-- cross -->
+  <path d="M300 152v96M252 200h96" stroke="#ffffff" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+  <!-- ambulance silhouette bottom -->
+  <g transform="translate(78 296)">
+    <rect x="0" y="18" width="132" height="52" rx="10" fill="#ffffff" fill-opacity=".2" stroke="#ffffff" stroke-opacity=".55" stroke-width="2.4"/>
+    <path d="M132 34h34l22 20v16h-56Z" fill="#ffffff" fill-opacity=".14" stroke="#ffffff" stroke-opacity=".5" stroke-width="2.4"/>
+    <circle cx="34" cy="78" r="13" fill="#7A1F1A" stroke="#ffffff" stroke-opacity=".6" stroke-width="2.4"/>
+    <circle cx="146" cy="78" r="13" fill="#7A1F1A" stroke="#ffffff" stroke-opacity=".6" stroke-width="2.4"/>
+    <path d="M54 34h8M58 30v8" stroke="#F6CE8B" stroke-width="5" stroke-linecap="round"/>
+    <rect x="150" y="40" width="26" height="18" rx="4" fill="#ffffff" fill-opacity=".3"/>
+  </g>
+  <!-- siren waves -->
+  <g stroke="#ffffff" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round">
+    <path d="M470 118a34 34 0 0 1 0 48"/><path d="M488 100a60 60 0 0 1 0 84"/><path d="M506 84a86 86 0 0 1 0 116"/>
+  </g>
+</svg>

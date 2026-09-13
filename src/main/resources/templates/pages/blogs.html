@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Blogs</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Health education','Health blogs','आरोग्य ब्लॉग',
+        'Written by our own physicians, in Marathi and English. No sponsored content, no product placement.',
+        'आमच्या डॉक्टरांनी लिहिलेले, मराठी व इंग्रजीतून.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3" th:if="${blogPage.totalElements > 0}">
+                <article class="chh-card chh-fade" th:each="b : ${blogPage.content}">
+                    <a th:href="@{'/blogs/' + ${b.slug}}">
+                        <div class="chh-blogcard__media">
+                            <svg><use href="/img/icons/sprite.svg#clipboard"></use></svg>
+                            <span class="chh-blogcard__cat" th:text="${b.category}">Category</span>
+                        </div>
+                    </a>
+                    <div class="chh-card__body">
+                        <h3 class="chh-blogcard__title">
+                            <a th:href="@{'/blogs/' + ${b.slug}}"
+                               th:text="${isMarathi} and ${b.titleMr != null} ? ${b.titleMr} : ${b.title}">Title</a>
+                        </h3>
+                        <p class="chh-blogcard__excerpt" th:text="${b.excerpt}">Excerpt</p>
+                        <div class="chh-blogcard__meta mt-auto">
+                            <span th:text="${b.author}">Author</span><span>·</span>
+                            <span th:if="${b.publishedAt != null}" th:text="${#temporals.format(b.publishedAt,'d MMM yyyy')}">Date</span>
+                            <span th:if="${b.readMinutes != null}" th:text="'· ' + ${b.readMinutes} + ' min read'">Read</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="chh-empty-page" th:unless="${blogPage.totalElements > 0}">
+                <p class="chh-lead">No articles published yet.</p>
+            </div>
+            <div th:replace="~{fragments/page-head :: pagination(${blogPage.number}, ${blogPage.totalPages}, '/blogs')}"></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

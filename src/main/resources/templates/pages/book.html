@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Book</title></head>
+<body>
+<main layout:fragment="content">
+
+    <div class="chh-pagehead">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-2" aria-label="Breadcrumb">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <span th:text="#{nav.book}">Book appointment</span>
+            </nav>
+            <h1 th:text="#{booking.title}">Schedule your appointment online</h1>
+            <p class="chh-lead mt-2 mb-0" th:text="#{booking.subtitle}">Two minutes, five steps.</p>
+        </div>
+    </div>
+
+    <section class="chh-section chh-section--tight">
+        <div th:replace="~{fragments/booking-widget :: widget(false)}"></div>
+    </section>
+
+    <!-- Support strip under the widget -->
+    <section class="chh-section--tight" style="padding-block:40px">
+        <div class="chh-container">
+            <div class="chh-grid-4">
+                <div class="chh-card chh-card--flat">
+                    <div class="chh-card__body">
+                        <span class="chh-icon"><svg><use href="/img/icons/sprite.svg#phone"></use></svg></span>
+                        <h3 class="chh-h4" th:text="#{topbar.helpline}">Helpline</h3>
+                        <p class="chh-small chh-muted mb-0" th:text="${contact.phone}">Phone</p>
+                        <a class="chh-link-arrow mt-2" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
+                            <span th:text="#{common.call}">Call us</span>
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="chh-card chh-card--flat">
+                    <div class="chh-card__body">
+                        <span class="chh-icon chh-icon--clay"><svg><use href="/img/icons/sprite.svg#ambulance"></use></svg></span>
+                        <h3 class="chh-h4" th:text="#{topbar.emergency}">24×7 Emergency</h3>
+                        <p class="chh-small chh-muted mb-0" th:text="${contact.emergency}">108</p>
+                        <a class="chh-link-arrow mt-2" th:href="@{/emergency}">
+                            <span th:text="#{common.learnmore}">Learn more</span>
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="chh-card chh-card--flat">
+                    <div class="chh-card__body">
+                        <span class="chh-icon chh-icon--accent"><svg><use href="/img/icons/sprite.svg#search-doc"></use></svg></span>
+                        <h3 class="chh-h4" th:text="#{topbar.track}">Track a booking</h3>
+                        <p class="chh-small chh-muted mb-0">Use your reference number, e.g. CHH-2026-000001.</p>
+                        <a class="chh-link-arrow mt-2" th:href="@{/track}">
+                            <span th:text="#{common.search}">Search</span>
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="chh-card chh-card--flat">
+                    <div class="chh-card__body">
+                        <span class="chh-icon chh-icon--indigo"><svg><use href="/img/icons/sprite.svg#whatsapp"></use></svg></span>
+                        <h3 class="chh-h4">WhatsApp us</h3>
+                        <p class="chh-small chh-muted mb-0">Reports, reminders and general queries.</p>
+                        <a class="chh-link-arrow mt-2" href="https://wa.me/919422100108" rel="noopener" target="_blank">
+                            <span th:text="#{common.call}">Chat</span>
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<th:block layout:fragment="scripts">
+    <script th:replace="~{fragments/booking-widget :: data}"></script>
+    <script th:src="@{/js/booking-widget.js}"></script>
+</th:block>
+</body>
+</html>

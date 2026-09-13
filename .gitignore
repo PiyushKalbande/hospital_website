@@ -1,0 +1,44 @@
+### Build output ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+out/
+
+### IDE ###
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+*.swp
+*~
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs / runtime ###
+*.log
+logs/
+uploads/
+hs_err_pid*
+replay_pid*
+
+### Secrets — never commit ###
+.env
+.env.*
+!.env.example
+application-local.yml
+application-secrets.yml
+*.pem
+*.p12
+*.jks
+
+### Frontend tooling ###
+node_modules/
+dist/
+.cache/

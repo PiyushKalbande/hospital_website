@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Track</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Self service','Track your appointment','तुमची अपॉइंटमेंट तपासा',
+        'Enter the booking reference from your confirmation SMS or email, for example CHH-2026-000001.',
+        'तुमच्या एसएमएस किंवा ईमेलमधील संदर्भ क्रमांक टाका.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container" style="max-width:780px">
+            <form class="chh-card mb-4" id="chhTrackForm" th:attr="data-preset-ref=${reference}">
+                <div class="chh-card__body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="chh-label" for="chhTrackRef" th:text="#{booking.success.reference}">Reference</label>
+                            <input class="chh-input chh-mono" id="chhTrackRef" required placeholder="CHH-2026-000001">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="chh-label" for="chhTrackPhone">
+                                <span th:text="#{common.mobile}">Mobile</span>
+                                <span class="chh-opt" th:text="'(' + #{common.optional} + ')'">(optional)</span>
+                            </label>
+                            <input class="chh-input" id="chhTrackPhone" inputmode="numeric" maxlength="10" placeholder="98XXXXXXXX">
+                        </div>
+                        <div class="col-12">
+                            <button class="chh-btn chh-btn--primary" type="submit">
+                                <svg width="16" height="16"><use href="/img/icons/sprite.svg#search"></use></svg>
+                                <span th:text="#{common.search}">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div id="chhTrackResult"></div>
+
+            <div class="chh-alert chh-alert--info mt-4">
+                <svg><use href="/img/icons/sprite.svg#info"></use></svg>
+                <span>Can't find your booking? Call
+                    <a th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}" th:text="${contact.phone}">the helpline</a>
+                    and quote your mobile number.</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

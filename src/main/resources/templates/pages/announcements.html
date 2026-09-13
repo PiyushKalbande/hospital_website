@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Updates</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Newsroom','Hospital updates','रुग्णालयाच्या बातम्या',
+        'New facilities, camps, technology and service changes at Chinche Hospital.',
+        'नवीन सुविधा, शिबिरे, तंत्रज्ञान व सेवा बदल.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-stack" th:if="${announcementPage.totalElements > 0}">
+                <a class="chh-announce chh-fade" style="padding:20px" th:each="a : ${announcementPage.content}"
+                   th:href="@{'/announcements/' + ${a.slug}}">
+                    <span class="chh-announce__thumb" style="width:120px;height:120px;flex-basis:120px">
+                        <svg style="width:52px;height:52px"><use href="/img/icons/sprite.svg#horn"></use></svg>
+                    </span>
+                    <span style="min-width:0;flex:1">
+                        <span class="chh-row mb-2">
+                            <span class="chh-chip chh-chip--accent" th:if="${a.badge != null}" th:text="${a.badge}">Badge</span>
+                            <span class="chh-tiny chh-faint" th:if="${a.publishedAt != null}"
+                                  th:text="${#temporals.format(a.publishedAt,'d MMM yyyy')}">Date</span>
+                        </span>
+                        <span class="chh-h4 d-block" th:text="${isMarathi} and ${a.titleMr != null} ? ${a.titleMr} : ${a.title}">Title</span>
+                        <span class="chh-announce__excerpt d-block" th:text="${a.summary}">Summary</span>
+                    </span>
+                </a>
+            </div>
+            <div class="chh-empty-page" th:unless="${announcementPage.totalElements > 0}">
+                <p class="chh-lead">No announcements yet.</p>
+            </div>
+            <div th:replace="~{fragments/page-head :: pagination(${announcementPage.number}, ${announcementPage.totalPages}, '/announcements')}"></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

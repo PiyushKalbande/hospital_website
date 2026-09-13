@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ==========================================================================
+     MULTI-STEP BOOKING WIDGET
+     -------------------------------------------------------------------------
+     Six states, one form:
+       1 service  →  2 doctor  →  3 date & time  →  4 patient  →  5 review  →  6 done
+
+     All data arrives from /api/v1 (doctors, packages, availability), so the exact
+     same widget can be embedded on a partner site or in a mobile WebView without
+     change. Client-side validation mirrors BookingRequest; the server is
+     authoritative. js/booking-widget.js drives it.
+     ========================================================================== -->
+<div class="chh-booking" th:fragment="widget(compact)">
+    <div class="chh-container">
+        <div class="chh-booking__shell">
+
+            <!-- Head -->
+            <div class="chh-booking__head">
+                <div>
+                    <h2 th:text="#{booking.title}">Schedule your appointment online</h2>
+                    <p th:text="#{booking.subtitle}">Choose a service, pick a specialist and confirm a slot.</p>
+                </div>
+                <div class="chh-booking__head-side">
+                    <a class="chh-booking__phone" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
+                        <svg><use href="/img/icons/sprite.svg#phone"></use></svg>
+                        <span th:text="${contact.phone}">+91 712 240 1100</span>
+                    </a>
+                    <span class="chh-badge-dot chh-badge-dot--live" style="color:#BFE8DC">
+                        <span th:text="#{booking.title.mr}">ऑनलाइन बुकिंग</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stepper -->
+            <ol class="chh-steps" id="chhSteps">
+                <li class="chh-steps__item is-active" data-step="1">
+                    <span class="chh-steps__num">1</span><span class="chh-steps__label" th:text="#{booking.step.service}">Service</span>
+                </li>
+                <li class="chh-steps__item" data-step="2">
+                    <span class="chh-steps__num">2</span><span class="chh-steps__label" th:text="#{booking.step.doctor}">Doctor</span>
+                </li>
+                <li class="chh-steps__item" data-step="3">
+                    <span class="chh-steps__num">3</span><span class="chh-steps__label" th:text="#{booking.step.datetime}">Date &amp; time</span>
+                </li>
+                <li class="chh-steps__item" data-step="4">
+                    <span class="chh-steps__num">4</span><span class="chh-steps__label" th:text="#{booking.step.details}">Details</span>
+                </li>
+                <li class="chh-steps__item" data-step="5">
+                    <span class="chh-steps__num">5</span><span class="chh-steps__label" th:text="#{booking.step.confirm}">Review</span>
+                </li>
+                <li class="chh-steps__item" data-step="6">
+                    <span class="chh-steps__num">✓</span><span class="chh-steps__label" th:text="#{booking.step.done}">Done</span>
+                </li>
+            </ol>
+
+            <form id="chhBookingForm" novalidate>
+                <div class="chh-booking__body">
+
+                    <!-- =============== STEP 1 — service type =============== -->
+                    <section class="chh-step-pane is-active" data-pane="1">
+                        <div class="chh-step-title" th:text="#{booking.step.service}">What care do you need?</div>
+                        <div class="chh-step-hint" th:text="#{booking.subtitle}">Choose one option to continue.</div>
+
+                        <div class="chh-service-grid" id="chhServiceGrid" role="radiogroup">
+                            <button type="button" class="chh-service-opt" role="radio" aria-checked="false"
+                                    th:each="st : ${serviceTypes}" th:attr="data-value=${st.name()}">
+                                <span class="chh-icon">
+                                    <svg><use th:href="@{'/img/icons/sprite.svg#' + ${
+                                        st.name() == 'OPD_CONSULTATION' ? 'stethoscope' :
+                                        st.name() == 'TELE_CONSULTATION' ? 'video' :
+                                        st.name() == 'HEALTH_CHECKUP' ? 'shield' :
+                                        st.name() == 'LAB_TEST' ? 'flask' :
+                                        st.name() == 'SECOND_OPINION' ? 'report' :
+                                        st.name() == 'HOME_CARE' ? 'rehab' : 'scalpel'}}"></use></svg>
+                                </span>
+                                <span class="chh-service-opt__name"
+                                      th:text="${isMarathi} ? ${st.labelMr} : ${st.label}">Service</span>
+                                <span class="chh-service-opt__desc" th:text="${st.description}">Description</span>
+                            </button>
+                        </div>
+
+                        <!-- Visit mode (step 1b, shown after a service is chosen) -->
+                        <div class="mt-4" id="chhVisitModeWrap" style="display:none">
+                            <div class="chh-label" th:text="#{common.consultation}">Consultation mode</div>
+                            <div class="chh-row" id="chhVisitMode" role="radiogroup">
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="true"
+                                        data-value="IN_HOSPITAL" style="cursor:pointer;padding:8px 16px">
+                                    <svg width="14" height="14"><use href="/img/icons/sprite.svg#building"></use></svg>
+                                    <span th:text="#{booking.pay.at.hospital}">At hospital</span>
+                                </button>
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="false"
+                                        data-value="VIDEO" style="cursor:pointer;padding:8px 16px">
+                                    <svg width="14" height="14"><use href="/img/icons/sprite.svg#video"></use></svg>
+                                    <span th:text="#{common.teleconsult}">Video</span>
+                                </button>
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="false"
+                                        data-value="HOME_VISIT" style="cursor:pointer;padding:8px 16px">
+                                    <svg width="14" height="14"><use href="/img/icons/sprite.svg#rehab"></use></svg>
+                                    <span th:text="#{nav.emergency}">Home visit</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- =============== STEP 2 — speciality + doctor =============== -->
+                    <section class="chh-step-pane" data-pane="2">
+                        <div class="chh-row chh-row--between mb-3">
+                            <div>
+                                <div class="chh-step-title" th:text="#{booking.step.doctor}">Choose your doctor</div>
+                                <div class="chh-step-hint" th:text="#{nav.doctors}">Find a doctor</div>
+                            </div>
+                        </div>
+
+                        <!-- Package picker (health check-up flow skips the doctor list) -->
+                        <div id="chhPackagePicker" style="display:none">
+                            <div class="chh-label" th:text="#{nav.packages}">Health check-ups</div>
+                            <div class="chh-doctor-list" id="chhPackageList"></div>
+                        </div>
+
+                        <div id="chhDoctorPicker">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-5">
+                                    <label class="chh-label" for="chhSpecialitySelect" th:text="#{nav.specialities}">Speciality</label>
+                                    <select class="chh-select" id="chhSpecialitySelect">
+                                        <option value="" th:text="#{section.viewall}">All</option>
+                                        <option th:each="s : ${specialities}" th:value="${s.id}"
+                                                th:text="${isMarathi} and ${s.nameMr != null} ? ${s.nameMr} : ${s.name}">Speciality</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="chh-label" for="chhFacilitySelect" th:text="#{nav.locations}">Centre</label>
+                                    <select class="chh-select" id="chhFacilitySelect">
+                                        <option value="" th:text="#{section.viewall}">All</option>
+                                        <option th:each="f : ${facilities}" th:value="${f.id}"
+                                                th:text="${isMarathi} and ${f.nameMr != null} ? ${f.nameMr} : ${f.name}">Facility</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <label class="chh-check">
+                                        <input type="checkbox" id="chhTeleOnly">
+                                        <span th:text="#{common.teleconsult}">Video consult available</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="chh-label">
+                                <span th:text="#{nav.doctors}">Doctors</span>
+                                <span class="chh-opt" id="chhDoctorCount"></span>
+                            </div>
+                            <div class="chh-doctor-list" id="chhDoctorList"></div>
+                        </div>
+                    </section>
+
+                    <!-- =============== STEP 3 — date & time =============== -->
+                    <section class="chh-step-pane" data-pane="3">
+                        <div class="chh-step-title" th:text="#{booking.step.datetime}">Pick date &amp; time</div>
+                        <div class="chh-step-hint">
+                            <span id="chhSlotDoctorName">—</span>
+                        </div>
+
+                        <div class="chh-label" th:text="#{common.page}">Dates</div>
+                        <div class="chh-datestrip" id="chhDateStrip"></div>
+
+                        <div id="chhSlotArea">
+                            <div class="chh-empty" id="chhSlotEmpty" style="display:none">
+                                <span class="chh-empty__icon"><svg><use href="/img/icons/sprite.svg#clock"></use></svg></span>
+                                <div th:text="#{booking.no.slots}">No slots open on this date.</div>
+                            </div>
+                            <div id="chhSlotGroups"></div>
+                        </div>
+
+                        <div class="chh-empty" id="chhSlotLoading" style="display:none">
+                            <span class="chh-spinner chh-spinner--dark"></span>
+                            <div th:text="#{common.loading}">Loading…</div>
+                        </div>
+                    </section>
+
+                    <!-- =============== STEP 4 — patient details =============== -->
+                    <section class="chh-step-pane" data-pane="4">
+                        <div class="chh-step-title" th:text="#{booking.step.details}">Patient details</div>
+                        <div class="chh-step-hint" th:text="#{common.required}">Required</div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientName" th:text="#{common.name}">Full name</label>
+                                    <input class="chh-input" id="chhPatientName" name="patientName" required
+                                           maxlength="160" autocomplete="name" th:placeholder="#{common.name}">
+                                    <div class="chh-error" data-error-for="patientName"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientPhone" th:text="#{common.mobile}">Mobile</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" style="border-radius:var(--chh-r-sm) 0 0 var(--chh-r-sm)">+91</span>
+                                        <input class="chh-input" id="chhPatientPhone" name="patientPhone" required
+                                               inputmode="numeric" maxlength="10" autocomplete="tel-national"
+                                               pattern="[6-9][0-9]{9}" placeholder="98XXXXXXXX"
+                                               style="border-radius:0 var(--chh-r-sm) var(--chh-r-sm) 0">
+                                    </div>
+                                    <div class="chh-error" data-error-for="patientPhone"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientEmail">
+                                        <span th:text="#{common.email}">Email</span>
+                                        <span class="chh-opt" th:text="'(' + #{common.optional} + ')'">(optional)</span>
+                                    </label>
+                                    <input class="chh-input" id="chhPatientEmail" name="patientEmail" type="email"
+                                           maxlength="160" autocomplete="email">
+                                    <div class="chh-error" data-error-for="patientEmail"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientAge" th:text="#{common.age}">Age</label>
+                                    <input class="chh-input" id="chhPatientAge" name="patientAge" type="number"
+                                           min="0" max="120" inputmode="numeric">
+                                    <div class="chh-error" data-error-for="patientAge"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientGender" th:text="#{common.gender}">Gender</label>
+                                    <select class="chh-select" id="chhPatientGender" name="patientGender">
+                                        <option value="" th:text="#{common.optional}">Optional</option>
+                                        <option value="MALE" th:text="#{common.gender} + ' — M'">Male</option>
+                                        <option value="FEMALE" th:text="#{common.gender} + ' — F'">Female</option>
+                                        <option value="OTHER" th:text="#{common.gender} + ' — O'">Other</option>
+                                        <option value="UNDISCLOSED" th:text="#{common.optional}">Prefer not to say</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientCity" th:text="#{common.city}">City / village</label>
+                                    <input class="chh-input" id="chhPatientCity" name="city" value="Katol" maxlength="120">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhPatientAddress">
+                                        <span th:text="#{common.address}">Address</span>
+                                        <span class="chh-opt" th:text="'(' + #{common.optional} + ')'">(optional)</span>
+                                    </label>
+                                    <input class="chh-input" id="chhPatientAddress" name="address" maxlength="300">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="chh-field">
+                                    <label class="chh-label" for="chhSymptoms">
+                                        <span th:text="#{booking.patient}">Symptoms / reason for visit</span>
+                                        <span class="chh-opt" th:text="'(' + #{common.optional} + ')'">(optional)</span>
+                                    </label>
+                                    <textarea class="chh-textarea" id="chhSymptoms" name="symptoms" maxlength="1000"
+                                              style="min-height:80px"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="chh-check">
+                                    <input type="checkbox" id="chhConsentSms" checked>
+                                    <span th:text="#{common.consent.sms}">Send reminders</span>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="chh-check">
+                                    <input type="checkbox" id="chhConsentEmail" checked>
+                                    <span th:text="#{common.consent.email}">Send reports by email</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- =============== STEP 5 — review =============== -->
+                    <section class="chh-step-pane" data-pane="5">
+                        <div class="chh-step-title" th:text="#{booking.step.confirm}">Review &amp; confirm</div>
+                        <div class="chh-step-hint" th:text="#{booking.summary}">Booking summary</div>
+                        <div class="chh-review" id="chhReview"></div>
+
+                        <div class="chh-alert chh-alert--info mt-3" id="chhReviewNote">
+                            <svg><use href="/img/icons/sprite.svg#info"></use></svg>
+                            <span th:text="#{booking.success.note}">Our front desk will call you to confirm.</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="chh-label" th:text="#{booking.fee}">Payment</label>
+                            <div class="chh-row" id="chhPaymentMode" role="radiogroup">
+                                <button type="button" class="chh-chip" role="radio" aria-checked="true"
+                                        data-value="PAY_AT_HOSPITAL" style="cursor:pointer;padding:8px 16px"
+                                        th:text="#{booking.pay.at.hospital}">Pay at hospital</button>
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="false"
+                                        data-value="UPI" style="cursor:pointer;padding:8px 16px">UPI</button>
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="false"
+                                        data-value="CARD" style="cursor:pointer;padding:8px 16px">Card</button>
+                                <button type="button" class="chh-chip chh-chip--outline" role="radio" aria-checked="false"
+                                        data-value="INSURANCE" style="cursor:pointer;padding:8px 16px">Insurance / TPA</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- =============== STEP 6 — success =============== -->
+                    <section class="chh-step-pane" data-pane="6">
+                        <div class="chh-success" id="chhSuccess"></div>
+                    </section>
+
+                    <!-- Global error surface -->
+                    <div class="chh-alert chh-alert--err mt-3" id="chhGlobalError" style="display:none">
+                        <svg><use href="/img/icons/sprite.svg#alert"></use></svg>
+                        <span id="chhGlobalErrorText"></span>
+                    </div>
+                </div>
+
+                <!-- Footer controls -->
+                <div class="chh-booking__foot" id="chhFoot">
+                    <button type="button" class="chh-btn chh-btn--ghost chh-btn--sm" id="chhBack" style="visibility:hidden">
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-left"></use></svg>
+                        <span th:text="#{booking.back}">Back</span>
+                    </button>
+                    <div class="chh-tiny chh-faint" id="chhStepCounter">
+                        <span th:text="#{booking.step}">Step</span> <b>1</b>/5
+                    </div>
+                    <button type="button" class="chh-btn chh-btn--primary" id="chhNext" disabled>
+                        <span th:text="#{booking.next}">Continue</span>
+                        <svg width="16" height="16"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ DATA ISLAND
+     Server-rendered JSON (built by BookingWidgetDataService with Jackson) so the
+     widget paints its first interactive state with no extra round trip. Live
+     availability is still fetched per doctor from /api/v1/availability.        -->
+<script th:fragment="data" type="application/json" id="chhBookingData"
+        th:utext="${bookingDataJson}">{}</script>
+
+</body>
+</html>

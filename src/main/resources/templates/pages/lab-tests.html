@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Lab tests</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Chinche Diagnostics','Lab tests & diagnostics','प्रयोगशाळा तपासणी',
+        'NABL-accredited laboratory at Station Road, Katol. Home sample collection 6:30 AM – 8:00 PM; most reports the same day.',
+        'स्टेशन रोड, कटोल येथे NABL मान्यताप्राप्त प्रयोगशाळा. घरी नमुना संकलन सकाळी ६:३० ते रात्री ८:००.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-card">
+                <div class="table-responsive">
+                    <table class="chh-table">
+                        <thead>
+                        <tr>
+                            <th th:text="#{nav.lab}">Test</th>
+                            <th>Category</th>
+                            <th>Sample</th>
+                            <th>Report</th>
+                            <th>Fasting</th>
+                            <th style="text-align:right">Price</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="l : ${labTests}">
+                            <td>
+                                <div class="chh-strong" th:text="${l.name}">Test</div>
+                                <div class="chh-tiny chh-faint chh-mr" th:if="${l.nameMr != null}" th:text="${l.nameMr}">मराठी</div>
+                            </td>
+                            <td><span class="chh-chip chh-chip--outline" th:text="${l.category}">Cat</span></td>
+                            <td class="chh-small chh-muted" th:text="${l.sampleType}">Sample</td>
+                            <td class="chh-small chh-muted" th:text="${l.reportHours} + ' h'">Hours</td>
+                            <td>
+                                <span class="chh-chip chh-chip--accent" th:if="${l.fastingRequired}">Yes</span>
+                                <span class="chh-tiny chh-faint" th:unless="${l.fastingRequired}">No</span>
+                            </td>
+                            <td style="text-align:right" class="chh-strong chh-num"
+                                th:text="'₹' + ${#numbers.formatInteger(l.price, 0, 'COMMA')}">₹0</td>
+                            <td>
+                                <a class="chh-btn chh-btn--primary chh-btn--sm" th:href="@{/book(service='LAB_TEST')}"
+                                   th:text="#{common.booknow}">Book</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="chh-tiny chh-faint mt-3">Prices are for self-pay patients. Package rates apply under Jan Arogya Yojana and most TPAs.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

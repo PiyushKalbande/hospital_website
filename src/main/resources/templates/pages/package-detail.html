@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Package</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-pagehead">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/health-packages}" th:text="#{nav.packages}">Health check-ups</a><span>/</span>
+                <span th:text="${healthPackage.name}">Name</span>
+            </nav>
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <span class="chh-chip chh-chip--accent mb-2" th:text="${healthPackage.tier}">Tier</span>
+                    <h1 th:text="${isMarathi} and ${healthPackage.nameMr != null} ? ${healthPackage.nameMr} : ${healthPackage.name}">Package</h1>
+                    <p class="chh-lead mt-2" th:text="${isMarathi} and ${healthPackage.taglineMr != null} ? ${healthPackage.taglineMr} : ${healthPackage.tagline}">Tagline</p>
+                    <p th:text="${isMarathi} and ${healthPackage.descriptionMr != null} ? ${healthPackage.descriptionMr} : ${healthPackage.description}">Description</p>
+                    <div class="chh-row mt-3" style="gap:8px">
+                        <span class="chh-amenity" th:text="${healthPackage.testCount} + ' tests included'">Tests</span>
+                        <span class="chh-amenity" th:if="${healthPackage.homeCollection}">Home sample collection</span>
+                        <span class="chh-amenity" th:if="${healthPackage.fastingRequired}">Fasting required</span>
+                        <span class="chh-amenity" th:text="'Reports in ' + ${healthPackage.reportHours} + ' hours'">Reports</span>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="chh-card" style="position:sticky;top:100px">
+                        <div class="chh-card__body">
+                            <div class="chh-review__label">Package price</div>
+                            <div class="chh-row" style="gap:12px;align-items:baseline">
+                                <span class="chh-h1" style="color:var(--chh-primary)"
+                                      th:text="'₹' + ${#numbers.formatInteger(healthPackage.price, 0, 'COMMA')}">₹0</span>
+                                <span class="chh-muted" style="text-decoration:line-through" th:if="${healthPackage.listPrice != null}"
+                                      th:text="'₹' + ${#numbers.formatInteger(healthPackage.listPrice, 0, 'COMMA')}">₹0</span>
+                            </div>
+                            <a class="chh-btn chh-btn--primary chh-btn--block chh-btn--lg mt-3"
+                               th:href="@{/book(service='HEALTH_CHECKUP',packageId=${healthPackage.id})}"
+                               th:text="#{common.booknow}">Book now</a>
+                            <a class="chh-btn chh-btn--outline chh-btn--block mt-2"
+                               th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}" th:text="#{common.call}">Call</a>
+                            <p class="chh-tiny chh-faint mt-3 mb-0">Pay at the centre or by UPI. Cashless under Jan Arogya Yojana where applicable.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <h2 class="chh-h3 mb-3">What is included</h2>
+                    <div class="chh-card">
+                        <ul class="chh-card__body" style="list-style:none;margin:0;padding:22px;gap:0">
+                            <li th:each="item : ${includesList}" class="d-flex gap-2 py-2"
+                                style="border-bottom:1px solid var(--chh-line)">
+                                <span class="chh-icon chh-icon--sm" style="flex:0 0 24px;width:24px;height:24px">
+                                    <svg style="width:14px;height:14px"><use href="/img/icons/sprite.svg#check"></use></svg>
+                                </span>
+                                <span class="chh-small" th:text="${item}">Test</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <h2 class="chh-h3 mb-3">Before you come</h2>
+                    <div class="chh-stack">
+                        <div class="chh-alert chh-alert--warn">
+                            <svg><use href="/img/icons/sprite.svg#alert"></use></svg>
+                            <span th:if="${healthPackage.fastingRequired}">Keep a 10–12 hour fasting gap. Water is allowed; tea, coffee and food are not.</span>
+                            <span th:unless="${healthPackage.fastingRequired}">No fasting needed for this package. Eat normally before your visit.</span>
+                        </div>
+                        <div class="chh-alert chh-alert--info">
+                            <svg><use href="/img/icons/sprite.svg#info"></use></svg>
+                            <span>Carry a government photo ID and any previous reports or prescriptions.</span>
+                        </div>
+                        <div class="chh-alert chh-alert--ok">
+                            <svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                            <span>A physician reviews your report with you in Marathi or English — this is included in the package.</span>
+                        </div>
+                    </div>
+
+                    <div th:if="${relatedPackages != null and !relatedPackages.isEmpty()}" class="mt-4">
+                        <h3 class="chh-h4 mb-2">Other packages</h3>
+                        <div class="chh-stack">
+                            <a class="chh-announce" th:each="r : ${relatedPackages}" th:href="@{'/health-packages/' + ${r.slug}}">
+                                <span class="chh-announce__thumb"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${r.iconKey}}"></use></svg></span>
+                                <span>
+                                    <span class="chh-announce__title d-block" th:text="${r.name}">Package</span>
+                                    <span class="chh-announce__date d-block"
+                                          th:text="'₹' + ${#numbers.formatInteger(r.price, 0, 'COMMA')} + ' · ' + ${r.testCount} + ' tests'">Price</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

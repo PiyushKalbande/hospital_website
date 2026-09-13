@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Procedure</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-pagehead">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/procedures}" th:text="#{nav.procedures}">Treatments</a><span>/</span>
+                <span th:text="${procedure.name}">Name</span>
+            </nav>
+            <div class="row g-4 align-items-end">
+                <div class="col-lg-8">
+                    <span class="chh-chip mb-2" th:if="${procedure.speciality != null}" th:text="${procedure.speciality.name}">Speciality</span>
+                    <h1 th:text="${isMarathi} and ${procedure.nameMr != null} ? ${procedure.nameMr} : ${procedure.name}">Procedure</h1>
+                    <p class="chh-lead mt-2 mb-0" th:text="${procedure.summary}">Summary</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="chh-card">
+                        <div class="chh-card__body">
+                            <div class="chh-review__label" th:text="#{common.from}">From</div>
+                            <div class="chh-h2" style="color:var(--chh-primary)"
+                                 th:text="${procedure.indicativeCost != null}
+                                          ? '₹' + ${#numbers.formatInteger(procedure.indicativeCost,0,'COMMA')} : 'On request'">₹0</div>
+                            <div class="chh-tiny chh-faint" th:if="${procedure.typicalStayDays != null and procedure.typicalStayDays > 0}"
+                                 th:text="${procedure.typicalStayDays} + '-day typical stay'">Stay</div>
+                            <a class="chh-btn chh-btn--primary chh-btn--block mt-3"
+                               th:href="@{/book(specialityId=${procedure.speciality != null ? procedure.speciality.id : null})}"
+                               th:text="#{nav.book}">Book</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Our team</span>
+                    <h2>Specialists who perform this</h2>
+                </div>
+            </div>
+            <div class="chh-grid-3" th:if="${doctors != null and !doctors.isEmpty()}">
+                <th:block th:each="d : ${doctors}">
+                    <div th:replace="~{fragments/page-head :: doctorCard(${d})}"></div>
+                </th:block>
+            </div>
+            <p class="chh-lead" th:unless="${doctors != null and !doctors.isEmpty()}">
+                Contact the helpline for the surgeon's current schedule.
+            </p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

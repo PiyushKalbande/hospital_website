@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Chinche Hospital</title></head>
+<body>
+
+<main layout:fragment="content">
+
+    <!-- ==================================================================
+         01 · HERO CAROUSEL
+         ================================================================== -->
+    <section class="chh-hero">
+        <div id="chhHero" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="7000">
+
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#chhHero" th:each="s,i : ${heroSlides}"
+                        th:attr="data-bs-slide-to=${i.index},aria-label='Slide ' + (${i.index} + 1)"
+                        th:classappend="${i.index == 0} ? 'active'"></button>
+            </div>
+
+            <div class="carousel-inner">
+                <div class="carousel-item" th:each="s,i : ${heroSlides}" th:classappend="${i.index == 0} ? 'active'"
+                     th:style="${s.backgroundImageUrl != null} ? 'background-image:url(' + ${s.backgroundImageUrl} + ')'">
+
+                    <div class="chh-hero__slide" th:style="'background:' + ${s.gradient}">
+                        <img class="chh-hero__art" th:if="${s.artKey != null}"
+                             th:src="@{'/img/art/' + ${s.artKey} + '.svg'}" alt="" aria-hidden="true">
+
+                        <div class="chh-container">
+                            <div class="chh-hero__content">
+                                <span class="chh-hero__eyebrow" th:if="${s.eyebrow}" th:text="${s.eyebrow}">Eyebrow</span>
+
+                                <h1 class="chh-hero__title"
+                                    th:text="${isMarathi} and ${s.headlineMr != null} ? ${s.headlineMr} : ${s.headline}">
+                                    Headline
+                                </h1>
+
+                                <p class="chh-hero__sub"
+                                   th:text="${isMarathi} and ${s.subheadlineMr != null} ? ${s.subheadlineMr} : ${s.subheadline}">
+                                    Subheadline
+                                </p>
+
+                                <div class="chh-hero__cta">
+                                    <a class="chh-btn chh-btn--accent chh-btn--lg" th:if="${s.ctaUrl != null}" th:href="${s.ctaUrl}">
+                                        <span th:text="${s.ctaLabel}">CTA</span>
+                                        <svg width="17" height="17"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                                    </a>
+                                    <a class="chh-btn chh-btn--onink chh-btn--lg" th:if="${s.secondaryCtaUrl != null}"
+                                       th:href="${s.secondaryCtaUrl}">
+                                        <span th:text="${s.secondaryCtaLabel}">Secondary CTA</span>
+                                    </a>
+                                </div>
+
+                                <div class="chh-hero__trust">
+                                    <span class="chh-hero__trust-item">
+                                        <svg><use href="/img/icons/sprite.svg#bed"></use></svg>
+                                        <span th:text="${stats.beds}">120</span> <span th:text="#{section.stats.beds}">beds</span>
+                                    </span>
+                                    <span class="chh-hero__trust-item">
+                                        <svg><use href="/img/icons/sprite.svg#stethoscope"></use></svg>
+                                        <span th:text="${stats.specialities}">18</span> <span th:text="#{section.stats.specialities}">specialities</span>
+                                    </span>
+                                    <span class="chh-hero__trust-item">
+                                        <svg><use href="/img/icons/sprite.svg#accreditation"></use></svg> NABH · NABL
+                                    </span>
+                                    <span class="chh-hero__trust-item">
+                                        <svg><use href="/img/icons/sprite.svg#clock"></use></svg> 24×7
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#chhHero" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#chhHero" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         02 · MULTI-STEP BOOKING WIDGET  (overlaps the hero)
+         ================================================================== -->
+    <div th:replace="~{fragments/booking-widget :: widget(false)}"></div>
+
+    <!-- ==================================================================
+         03 · ANNOUNCEMENT MARQUEE
+         ================================================================== -->
+    <section class="chh-section--tight" style="background:var(--chh-accent-tint);border-block:1px solid rgba(232,163,61,.28)">
+        <div class="chh-container">
+            <div class="d-flex align-items-center gap-3">
+                <span class="chh-badge-dot chh-badge-dot--live" style="flex:0 0 auto">
+                    <span th:text="#{section.announcement}">Announcement</span>
+                </span>
+                <div class="chh-marquee flex-grow-1">
+                    <div class="chh-marquee__track">
+                        <a th:each="a : ${announcements}" th:href="@{'/announcements/' + ${a.slug}}"
+                           style="display:inline-flex;align-items:center;gap:8px;font-size:.855rem;font-weight:600;color:#7A4E0E">
+                            <svg width="15" height="15" style="flex:0 0 15px"><use href="/img/icons/sprite.svg#horn"></use></svg>
+                            <span th:text="${isMarathi} and ${a.titleMr != null} ? ${a.titleMr} : ${a.title}">Announcement</span>
+                        </a>
+                        <!-- duplicated for a seamless loop -->
+                        <a th:each="a : ${announcements}" th:href="@{'/announcements/' + ${a.slug}}"
+                           style="display:inline-flex;align-items:center;gap:8px;font-size:.855rem;font-weight:600;color:#7A4E0E">
+                            <svg width="15" height="15" style="flex:0 0 15px"><use href="/img/icons/sprite.svg#horn"></use></svg>
+                            <span th:text="${isMarathi} and ${a.titleMr != null} ? ${a.titleMr} : ${a.title}">Announcement</span>
+                        </a>
+                    </div>
+                </div>
+                <a class="chh-link-arrow" style="flex:0 0 auto" th:href="@{/announcements}">
+                    <span th:text="#{section.viewall}">View all</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         04 · QUICK SERVICE TILES
+         ================================================================== -->
+    <section class="chh-section chh-section--tight">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow" th:text="#{footer.patient}">Patient services</span>
+                    <h2 th:text="#{section.quick.services}">Quick services</h2>
+                </div>
+                <div class="chh-section-head__aside">
+                    <a class="chh-btn chh-btn--danger chh-btn--sm" th:href="@{/emergency}">
+                        <svg width="16" height="16"><use href="/img/icons/sprite.svg#ambulance"></use></svg>
+                        <span th:text="#{topbar.emergency}">24×7 Emergency</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chh-tiles">
+                <a class="chh-tile chh-fade" th:each="q : ${heroQuickLinks}" th:href="@{${q.linkUrl}}">
+                    <span class="chh-icon chh-icon--lg">
+                        <svg><use th:href="@{'/img/icons/sprite.svg#' + ${q.iconKey}}"></use></svg>
+                    </span>
+                    <span class="chh-tile__label"
+                          th:text="${isMarathi} and ${q.labelMr != null} ? ${q.labelMr} : ${q.label}">Service</span>
+                    <span class="chh-tile__desc"
+                          th:text="${isMarathi} and ${q.descriptionMr != null} ? ${q.descriptionMr} : ${q.description}">Desc</span>
+                    <span class="chh-tile__go">
+                        <span th:text="#{common.learnmore}">Learn more</span>
+                        <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         05 · STATS BAND
+         ================================================================== -->
+    <section class="chh-section--tight" style="padding-block:0">
+        <div class="chh-container">
+            <div class="chh-stats chh-fade">
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span data-count="27" data-suffix="+">0</span></div>
+                    <div class="chh-stat__label" th:text="#{section.stats.years}">Years of service</div>
+                </div>
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span data-count="120">0</span></div>
+                    <div class="chh-stat__label" th:text="#{section.stats.beds}">Beds</div>
+                </div>
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span th:attr="data-count=${stats.specialities}">0</span></div>
+                    <div class="chh-stat__label" th:text="#{section.stats.specialities}">Specialities</div>
+                </div>
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span th:attr="data-count=${stats.doctors}">0</span>+</div>
+                    <div class="chh-stat__label" th:text="#{section.stats.doctors}">Doctors</div>
+                </div>
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span th:attr="data-count=${stats.facilities}">0</span></div>
+                    <div class="chh-stat__label" th:text="#{section.stats.centres}">Centres</div>
+                </div>
+                <div class="chh-stat">
+                    <div class="chh-stat__num"><span data-count="180000" data-suffix="+">0</span></div>
+                    <div class="chh-stat__label">Patients treated</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         06 · SPECIALITIES & PROCEDURES (tabbed)
+         ================================================================== -->
+    <section class="chh-section chh-section--tinted" id="specialities">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Care departments</span>
+                    <h2 th:text="#{section.specialities}">Specialities &amp; treatments</h2>
+                    <p class="chh-lead mt-2 mb-0"
+                       th:text="${isMarathi}
+                           ? 'कटोल येथेच तृतीयस्तर वैद्यकीय सेवा — हृदयरोग, अस्थिरोग, प्रसूती, नवजात, मेंदुरोग व मूत्रपिंड विभाग.'
+                           : 'Tertiary-level care without the trip to Nagpur — cardiac, orthopaedic, maternity, neonatal, neuro and renal services under one roof.'">
+                    </p>
+                </div>
+                <div class="chh-section-head__aside">
+                    <div class="chh-tabbar" data-chh-tabgroup="[data-chh-tabpanel]">
+                        <button type="button" data-chh-tab="#tabSpecialities" aria-selected="true" class="active"
+                                th:text="#{section.specialities.tab}">Specialities</button>
+                        <button type="button" data-chh-tab="#tabProcedures" aria-selected="false"
+                                th:text="#{section.procedures.tab}">Procedures</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialities panel -->
+            <div id="tabSpecialities" data-chh-tabpanel>
+                <div class="chh-rail" id="railSpecialities" data-chh-rail="#railSpecialities">
+                    <a class="chh-catcard chh-fade" style="width:196px" th:each="s : ${specialities}"
+                       th:href="@{'/specialities/' + ${s.slug}}"
+                       th:style="'--chh-cat-accent:' + ${s.accentColor}">
+                        <span class="chh-icon chh-icon--lg"
+                              th:style="'background:' + ${s.accentColor} + '18;color:' + ${s.accentColor}">
+                            <svg><use th:href="@{'/img/icons/sprite.svg#' + ${s.iconKey}}"></use></svg>
+                        </span>
+                        <span class="chh-catcard__name"
+                              th:text="${isMarathi} and ${s.nameMr != null} ? ${s.nameMr} : ${s.name}">Speciality</span>
+                        <span class="chh-catcard__sub" th:text="${#strings.abbreviate(s.summary, 62)}">Summary</span>
+                        <span class="chh-catcard__meta">
+                            <span th:text="#{common.learnmore}">Learn more</span> →
+                        </span>
+                    </a>
+                </div>
+                <div class="chh-row chh-row--between mt-3">
+                    <div class="chh-rail-nav">
+                        <button class="chh-rail-btn" type="button" data-chh-rail-prev="#railSpecialities" aria-label="Previous">
+                            <svg><use href="/img/icons/sprite.svg#chevron-left"></use></svg>
+                        </button>
+                        <button class="chh-rail-btn" type="button" data-chh-rail-next="#railSpecialities" aria-label="Next">
+                            <svg><use href="/img/icons/sprite.svg#chevron-right"></use></svg>
+                        </button>
+                    </div>
+                    <a class="chh-link-arrow" th:href="@{/specialities}">
+                        <span th:text="#{section.viewall}">View all</span>
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Procedures panel -->
+            <div id="tabProcedures" data-chh-tabpanel style="display:none">
+                <div class="chh-rail" id="railProcedures" data-chh-rail="#railProcedures">
+                    <a class="chh-catcard chh-fade" style="width:230px" th:each="p : ${procedures}"
+                       th:href="@{'/procedures/' + ${p.slug}}">
+                        <span class="chh-icon chh-icon--lg chh-icon--indigo">
+                            <svg><use th:href="@{'/img/icons/sprite.svg#' + ${p.iconKey}}"></use></svg>
+                        </span>
+                        <span class="chh-catcard__name"
+                              th:text="${isMarathi} and ${p.nameMr != null} ? ${p.nameMr} : ${p.name}">Procedure</span>
+                        <span class="chh-catcard__sub" th:text="${#strings.abbreviate(p.summary, 78)}">Summary</span>
+                        <span class="chh-catcard__meta" th:if="${p.indicativeCost != null}"
+                              th:text="#{common.from} + ' ₹' + ${#numbers.formatInteger(p.indicativeCost,0,'COMMA')}">From</span>
+                    </a>
+                </div>
+                <div class="chh-row chh-row--between mt-3">
+                    <div class="chh-rail-nav">
+                        <button class="chh-rail-btn" type="button" data-chh-rail-prev="#railProcedures" aria-label="Previous">
+                            <svg><use href="/img/icons/sprite.svg#chevron-left"></use></svg>
+                        </button>
+                        <button class="chh-rail-btn" type="button" data-chh-rail-next="#railProcedures" aria-label="Next">
+                            <svg><use href="/img/icons/sprite.svg#chevron-right"></use></svg>
+                        </button>
+                    </div>
+                    <a class="chh-link-arrow" th:href="@{/procedures}">
+                        <span th:text="#{section.viewall}">View all</span>
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         07 · CONDITIONS WE TREAT (bilingual grid)
+         ================================================================== -->
+    <section class="chh-section chh-section--tight">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Common concerns</span>
+                    <h2 th:text="${isMarathi} ? 'आम्ही उपचार करत असलेले आजार' : 'Conditions we treat every day'">Conditions</h2>
+                </div>
+                <div class="chh-section-head__aside">
+                    <a class="chh-link-arrow" th:href="@{/conditions}">
+                        <span th:text="#{section.viewall}">View all</span>
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="chh-catgrid">
+                <a class="chh-catcard chh-fade" th:each="c : ${conditions}" th:href="@{'/conditions/' + ${c.slug}}">
+                    <span class="chh-icon"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${c.iconKey}}"></use></svg></span>
+                    <span class="chh-catcard__name" th:text="${c.name}">Condition</span>
+                    <span class="chh-catcard__sub chh-mr" th:if="${c.nameMr != null}" th:text="${c.nameMr}">मराठी</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         08 · FIND A DOCTOR CTA + FEATURED SPECIALISTS
+         ================================================================== -->
+    <section class="chh-section chh-section--surface" id="doctors">
+        <div class="chh-container">
+            <div class="chh-ctaband chh-fade mb-5">
+                <div>
+                    <span class="chh-eyebrow" style="color:#FFE9C4">Our panel</span>
+                    <h2 class="mt-2" th:text="#{section.expert.title}">Looking for a specialist?</h2>
+                    <p th:text="#{section.expert.body}">Tertiary expertise in Katol taluka.</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="chh-btn chh-btn--light chh-btn--lg" th:href="@{/doctors}">
+                        <svg width="17" height="17"><use href="/img/icons/sprite.svg#search-doc"></use></svg>
+                        <span th:text="#{section.expert.cta}">Find a doctor</span>
+                    </a>
+                    <a class="chh-btn chh-btn--onink chh-btn--lg" th:href="@{/book}">
+                        <span th:text="#{nav.book}">Book appointment</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chh-grid-4">
+                <div class="chh-card chh-doccard chh-fade" th:each="d : ${featuredDoctors}">
+                    <div class="chh-card__body">
+                        <div class="chh-doccard__top">
+                            <div class="chh-doccard__avatar"
+                                 th:with="nm=${d.name != null} ? ${#strings.replace(d.name,'Dr. ','')} : ${''}"
+                                 th:text="${#strings.isEmpty(nm)} ? '?' : ${#strings.toUpperCase(#strings.substring(nm,0,1))} + (${#strings.length(nm) > 1} ? ${#strings.toUpperCase(#strings.substring(nm,1,2))} : '')">AB</div>
+                            <div style="min-width:0">
+                                <div class="chh-doccard__name">
+                                    <a th:href="@{'/doctors/' + ${d.slug}}" th:text="${d.name}">Doctor</a>
+                                </div>
+                                <div class="chh-doccard__role" th:text="${d.designation}">Designation</div>
+                                <div class="chh-doccard__quals" th:text="${d.qualifications}">Qualifications</div>
+                            </div>
+                        </div>
+                        <div class="chh-doccard__facts">
+                            <span class="chh-chip" th:if="${d.specialityName != null}" th:text="${d.specialityName}">Speciality</span>
+                            <span class="chh-chip chh-chip--outline" th:if="${d.experienceYears != null}"
+                                  th:text="${d.experienceYears} + ' ' + #{common.experience}">Years</span>
+                            <span class="chh-rating" th:if="${d.rating != null}">
+                                <svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                                <span th:text="${#numbers.formatDecimal(d.rating,1,1)}">4.8</span>
+                                <span class="chh-faint chh-tiny" th:text="'(' + ${d.reviewCount} + ')'">(200)</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chh-card__foot chh-doccard__foot">
+                        <span class="chh-doccard__fee">
+                            <b th:text="${d.consultationFee != null and d.consultationFee.doubleValue() > 0}
+                                        ? '₹' + ${#numbers.formatInteger(d.consultationFee, 0, 'COMMA')} : '—'">₹500</b>
+                            <span th:text="#{common.consultation}">Consultation</span>
+                        </span>
+                        <a class="chh-btn chh-btn--primary chh-btn--sm"
+                           th:href="@{/book(doctorId=${d.id})}">
+                            <span th:text="#{common.booknow}">Book</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         09 · HOSPITAL NETWORK RAIL
+         ================================================================== -->
+    <section class="chh-section" id="locations">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Our network</span>
+                    <h2 th:text="#{section.network.title}">Our centres near you</h2>
+                    <p class="chh-lead mt-2 mb-0" th:text="#{section.network.body}">Four centres across Katol taluka.</p>
+                </div>
+                <div class="chh-section-head__aside">
+                    <div class="chh-rail-nav">
+                        <button class="chh-rail-btn" type="button" data-chh-rail-prev="#railFacilities" aria-label="Previous">
+                            <svg><use href="/img/icons/sprite.svg#chevron-left"></use></svg>
+                        </button>
+                        <button class="chh-rail-btn" type="button" data-chh-rail-next="#railFacilities" aria-label="Next">
+                            <svg><use href="/img/icons/sprite.svg#chevron-right"></use></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chh-rail" id="railFacilities" data-chh-rail="#railFacilities">
+                <article class="chh-card chh-facility-card chh-fade" th:each="f : ${facilities}">
+                    <div class="chh-facility-card__media">
+                        <img th:src="@{/img/art/facility-bg.svg}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+                        <span class="chh-facility-card__badge" th:if="${f.headquarter}">HQ</span>
+                        <span class="chh-facility-card__badge" th:unless="${f.headquarter}"
+                              th:text="${f.facilityType != null} ? ${f.facilityType.label}">Clinic</span>
+                        <span class="chh-facility-card__rating" th:if="${f.rating != null}">
+                            <svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                            <span th:text="${#numbers.formatDecimal(f.rating,1,1)}">4.7</span>
+                        </span>
+                    </div>
+                    <div class="chh-card__body">
+                        <h3 class="chh-h4">
+                            <a th:href="@{'/locations/' + ${f.slug}}"
+                               th:text="${isMarathi} and ${f.nameMr != null} ? ${f.nameMr} : ${f.name}">Facility</a>
+                        </h3>
+                        <p class="chh-small chh-muted mb-0" style="display:flex;gap:6px">
+                            <svg width="14" height="14" style="flex:0 0 14px;margin-top:3px"><use href="/img/icons/sprite.svg#pin"></use></svg>
+                            <span th:text="${f.addressLine}">Address</span>
+                        </p>
+                        <p class="chh-tiny chh-faint mb-0" th:if="${f.hoursText != null}" th:text="${f.hoursText}">Hours</p>
+                        <div class="chh-facility-card__amenities" th:if="${f.amenities != null}">
+                            <span class="chh-amenity" th:each="a : ${#strings.arraySplit(f.amenities,',')}"
+                                  th:text="${#strings.toUpperCase(a)}">ICU</span>
+                        </div>
+                    </div>
+                    <div class="chh-card__foot d-flex gap-2">
+                        <a class="chh-btn chh-btn--outline chh-btn--sm flex-fill"
+                           th:href="'tel:' + ${#strings.replace(f.phone,' ','')}">
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                            <span th:text="#{common.call}">Call</span>
+                        </a>
+                        <a class="chh-btn chh-btn--primary chh-btn--sm flex-fill" th:href="@{/book(facilityId=${f.id})}">
+                            <span th:text="#{common.booknow}">Book</span>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         10 · HEALTH PACKAGES
+         ================================================================== -->
+    <section class="chh-section chh-section--tinted" id="packages">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Preventive care</span>
+                    <h2 th:text="#{section.packages.title}">Preventive health check-ups</h2>
+                    <p class="chh-lead mt-2 mb-0" th:text="#{section.packages.body}">Full-body packages.</p>
+                </div>
+                <div class="chh-section-head__aside">
+                    <a class="chh-link-arrow" th:href="@{/health-packages}">
+                        <span th:text="#{section.viewall}">View all</span>
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chh-grid-4">
+                <div class="chh-card chh-fade" th:each="p : ${featuredPackages}"
+                     th:classappend="${p.featured} ? 'border-2'">
+                    <div class="chh-card__body">
+                        <div class="chh-row chh-row--between">
+                            <span class="chh-icon"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${p.iconKey}}"></use></svg></span>
+                            <span class="chh-chip chh-chip--accent" th:if="${p.featured}">Popular</span>
+                            <span class="chh-chip chh-chip--outline" th:unless="${p.featured}" th:text="${p.tier}">Tier</span>
+                        </div>
+                        <h3 class="chh-h4" th:text="${isMarathi} and ${p.nameMr != null} ? ${p.nameMr} : ${p.name}">Package</h3>
+                        <p class="chh-small chh-muted" th:text="${isMarathi} and ${p.taglineMr != null} ? ${p.taglineMr} : ${p.tagline}">Tagline</p>
+                        <div class="chh-row" style="gap:8px">
+                            <span class="chh-h3" style="color:var(--chh-primary)"
+                                  th:text="'₹' + ${#numbers.formatInteger(p.price, 0, 'COMMA')}">₹2,499</span>
+                            <span class="chh-small chh-faint" style="text-decoration:line-through"
+                                  th:if="${p.listPrice != null}"
+                                  th:text="'₹' + ${#numbers.formatInteger(p.listPrice, 0, 'COMMA')}">₹3,900</span>
+                        </div>
+                        <div class="chh-tiny chh-faint">
+                            <span th:text="${p.testCount}">64</span> <span th:text="#{common.tests}">tests included</span>
+                            · <span th:text="${p.reportHours} + 'h'">24h</span> reports
+                        </div>
+                    </div>
+                    <div class="chh-card__foot d-flex gap-2">
+                        <a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/health-packages/' + ${p.slug}}">
+                            <span th:text="#{common.learnmore}">Details</span>
+                        </a>
+                        <a class="chh-btn chh-btn--primary chh-btn--sm flex-fill"
+                           th:href="@{/book(service='HEALTH_CHECKUP',packageId=${p.id})}">
+                            <span th:text="#{common.booknow}">Book</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         11 · PATIENT OUTCOME STORIES
+         ================================================================== -->
+    <section class="chh-section chh-section--ink" id="stories">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow" style="color:var(--chh-accent)">Outcomes</span>
+                    <h2 th:text="#{section.stories.title}">Patient outcomes</h2>
+                    <p class="chh-lead mt-2 mb-0" th:text="#{section.stories.body}">Treatment results.</p>
+                </div>
+                <div class="chh-section-head__aside">
+                    <div class="chh-rail-nav">
+                        <button class="chh-rail-btn" type="button" data-chh-rail-prev="#railStories"
+                                style="border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff" aria-label="Previous">
+                            <svg><use href="/img/icons/sprite.svg#chevron-left"></use></svg>
+                        </button>
+                        <button class="chh-rail-btn" type="button" data-chh-rail-next="#railStories"
+                                style="border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff" aria-label="Next">
+                            <svg><use href="/img/icons/sprite.svg#chevron-right"></use></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chh-rail" id="railStories" data-chh-rail="#railStories">
+                <article class="chh-story chh-fade" style="width:330px" th:each="s : ${stories}">
+                    <span class="chh-story__play" th:if="${s.videoId != null}">
+                        <svg><use href="/img/icons/sprite.svg#play"></use></svg>
+                    </span>
+                    <span class="chh-chip chh-chip--ink mb-2" style="align-self:flex-start;position:relative;z-index:1"
+                          th:if="${s.speciality != null}" th:text="${s.speciality.name}">Speciality</span>
+                    <h3 class="chh-story__title" th:text="${s.title}">Story title</h3>
+                    <p class="chh-small" style="color:#B9D3CC;position:relative;z-index:1"
+                       th:text="${#strings.abbreviate(s.summary, 130)}">Summary</p>
+                    <div class="chh-story__by">
+                        <span th:text="#{common.readmore}">Treated by</span>
+                        <b th:if="${s.doctor != null}" th:text="${s.doctor.name}">Doctor</b>
+                        <span th:if="${s.patientCity != null}" th:text="' · ' + ${s.patientCity}">City</span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="text-center mt-4">
+                <a class="chh-btn chh-btn--onink" th:href="@{/patient-stories}">
+                    <span th:text="#{section.viewall}">View all</span>
+                    <svg width="16" height="16"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         12 · TESTIMONIALS
+         ================================================================== -->
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Trust</span>
+                    <h2 th:text="#{section.testimonials.title}">What patients say</h2>
+                </div>
+            </div>
+            <div class="chh-grid-3">
+                <blockquote class="chh-quote chh-fade" th:each="t : ${testimonials}">
+                    <div class="chh-stars" th:if="${t.rating != null}">
+                        <svg th:each="i : ${#numbers.sequence(1, t.rating)}"><use href="/img/icons/sprite.svg#star"></use></svg>
+                    </div>
+                    <p class="chh-quote__text" th:text="${t.quote}">Quote</p>
+                    <div class="chh-quote__who">
+                        <span class="chh-quote__avatar" th:text="${#strings.substring(t.patientName,0,1)}">A</span>
+                        <span>
+                            <span class="chh-quote__name chh-mr" th:text="${t.patientName}">Name</span>
+                            <span class="chh-quote__meta"
+                                  th:text="${t.city} + (${t.speciality != null} ? ' · ' + ${t.speciality.name} : '')">City</span>
+                        </span>
+                    </div>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         13 · HEALTH BLOGS
+         ================================================================== -->
+    <section class="chh-section chh-section--surface" id="blogs">
+        <div class="chh-container">
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Health education</span>
+                    <h2 th:text="#{section.blogs.title}">Health blogs</h2>
+                    <p class="chh-lead mt-2 mb-0" th:text="#{section.blogs.body}">Practical advice.</p>
+                </div>
+                <div class="chh-section-head__aside">
+                    <a class="chh-link-arrow" th:href="@{/blogs}">
+                        <span th:text="#{section.viewall}">View all</span>
+                        <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chh-grid-3">
+                <article class="chh-card chh-fade" th:each="b : ${blogs}">
+                    <a th:href="@{'/blogs/' + ${b.slug}}">
+                        <div class="chh-blogcard__media">
+                            <svg><use href="/img/icons/sprite.svg#clipboard"></use></svg>
+                            <span class="chh-blogcard__cat" th:text="${b.category}">Category</span>
+                        </div>
+                    </a>
+                    <div class="chh-card__body">
+                        <h3 class="chh-blogcard__title">
+                            <a th:href="@{'/blogs/' + ${b.slug}}"
+                               th:text="${isMarathi} and ${b.titleMr != null} ? ${b.titleMr} : ${b.title}">Title</a>
+                        </h3>
+                        <p class="chh-blogcard__excerpt" th:text="${b.excerpt}">Excerpt</p>
+                        <div class="chh-blogcard__meta mt-auto">
+                            <span th:text="${b.author}">Author</span>
+                            <span>·</span>
+                            <span th:if="${b.publishedAt != null}"
+                                  th:text="${#temporals.format(b.publishedAt,'d MMM yyyy')}">Date</span>
+                            <span th:if="${b.readMinutes != null}" th:text="'· ' + ${b.readMinutes} + ' min'">Read</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         14 · HOSPITAL UPDATES / ANNOUNCEMENTS
+         ================================================================== -->
+    <section class="chh-section" id="news">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="chh-section-head" style="margin-bottom:20px">
+                        <div class="chh-section-head__title">
+                            <span class="chh-eyebrow">Newsroom</span>
+                            <h2 th:text="#{section.news.title}">Hospital updates</h2>
+                            <p class="chh-lead mt-2 mb-0" th:text="#{section.news.body}">New facilities and camps.</p>
+                        </div>
+                        <div class="chh-section-head__aside">
+                            <a class="chh-link-arrow" th:href="@{/announcements}">
+                                <span th:text="#{section.viewall}">View all</span>
+                                <svg width="15" height="15"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="chh-stack">
+                        <a class="chh-announce chh-fade" th:each="a : ${announcements}"
+                           th:href="@{'/announcements/' + ${a.slug}}">
+                            <span class="chh-announce__thumb">
+                                <svg><use href="/img/icons/sprite.svg#horn"></use></svg>
+                            </span>
+                            <span style="min-width:0">
+                                <span class="chh-chip chh-chip--accent mb-2" th:if="${a.badge != null}" th:text="${a.badge}">Badge</span>
+                                <span class="chh-announce__title d-block"
+                                      th:text="${isMarathi} and ${a.titleMr != null} ? ${a.titleMr} : ${a.title}">Title</span>
+                                <span class="chh-announce__excerpt d-block" th:text="${#strings.abbreviate(a.summary,140)}">Summary</span>
+                                <span class="chh-announce__date d-block" th:if="${a.publishedAt != null}"
+                                      th:text="${#temporals.format(a.publishedAt,'d MMM yyyy')}">Date</span>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 15 · AWARDS -->
+                <div class="col-lg-5">
+                    <div class="chh-section-head" style="margin-bottom:20px">
+                        <div class="chh-section-head__title">
+                            <span class="chh-eyebrow">Quality</span>
+                            <h2 th:text="#{section.awards.title}">Awards &amp; accreditation</h2>
+                        </div>
+                    </div>
+                    <div class="chh-stack">
+                        <div class="chh-award chh-fade" th:each="a : ${awards}">
+                            <span class="chh-icon chh-icon--accent">
+                                <svg><use th:href="@{'/img/icons/sprite.svg#' + ${a.iconKey}}"></use></svg>
+                            </span>
+                            <span>
+                                <span class="chh-award__title d-block" th:text="${a.title}">Award</span>
+                                <span class="chh-award__meta d-block"
+                                      th:text="${a.issuer} + (${a.awardYear != null} ? ' · ' + ${a.awardYear} : '')">Issuer</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================================================================
+         16 · CLOSING CTA
+         ================================================================== -->
+    <section class="chh-section chh-section--tight">
+        <div class="chh-container">
+            <div class="chh-ctaband">
+                <img class="chh-ctaband__art" th:src="@{/img/art/checkup.svg}" alt="" aria-hidden="true">
+                <div style="position:relative;z-index:1">
+                    <h2 th:text="${isMarathi}
+                        ? 'आजच तुमची अपॉइंटमेंट बुक करा'
+                        : 'Book your appointment in under two minutes'">Book now</h2>
+                    <p th:text="${isMarathi}
+                        ? 'ऑनलाइन बुकिंग, व्हिडिओ सल्ला, घरी नमुना संकलन आणि २४×७ आपत्कालीन सेवा — सर्व एकाच ठिकाणी.'
+                        : 'Online booking, video consultation, home sample collection and a 24×7 emergency department — all in one place.'">
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap" style="position:relative;z-index:1">
+                    <a class="chh-btn chh-btn--light chh-btn--lg" th:href="@{/book}">
+                        <svg width="17" height="17"><use href="/img/icons/sprite.svg#calendar"></use></svg>
+                        <span th:text="#{nav.book}">Book appointment</span>
+                    </a>
+                    <a class="chh-btn chh-btn--onink chh-btn--lg" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
+                        <svg width="17" height="17"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                        <span th:text="${contact.phone}">Call</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<th:block layout:fragment="scripts">
+    <script th:replace="~{fragments/booking-widget :: data}"></script>
+    <script th:src="@{/js/booking-widget.js}"></script>
+</th:block>
+
+</body>
+</html>

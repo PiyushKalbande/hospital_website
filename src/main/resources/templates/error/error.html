@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="'Error ' + ${errorCode} + ' | Chinche Hospital'">Error</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-section">
+        <div class="chh-container" style="max-width:640px;text-align:center">
+            <div class="chh-h1" style="font-size:clamp(4rem,12vw,7rem);color:var(--chh-primary-tint);line-height:1;font-weight:800"
+                 th:text="${errorCode}">404</div>
+            <h1 class="mt-2" th:text="${errorTitle}">Error</h1>
+            <p class="chh-lead mt-2" th:text="${errorBody}">Body</p>
+            <p class="chh-tiny chh-faint" th:if="${errorPath}" th:text="${errorPath}">Path</p>
+            <div class="chh-row mt-4" style="justify-content:center">
+                <a class="chh-btn chh-btn--primary" th:href="@{/}" th:text="#{error.home}">Home</a>
+                <a class="chh-btn chh-btn--outline" th:href="@{/book}" th:text="#{nav.book}">Book</a>
+                <a class="chh-btn chh-btn--ghost" th:href="@{/contact}" th:text="#{nav.contact}">Contact</a>
+            </div>
+            <div class="chh-alert chh-alert--err mt-4" th:if="${errorCode == 500}">
+                <svg><use href="/img/icons/sprite.svg#phone"></use></svg>
+                <span>If you need care right now, call <a href="tel:108"><b>108</b></a>.</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

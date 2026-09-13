@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  Shared <head>: SEO tags, Open Graph, JSON-LD local-business schema,
+  Devanagari webfont, Bootstrap + design system.
+-->
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE"
+           th:text="${pageTitle} ?: #{site.name} + ' — ' + #{site.city}">Chinche Hospital</title>
+
+    <meta name="description" th:content="${metaDescription} ?: #{site.tagline}">
+    <meta name="author" content="Chinche Hospital, Katol">
+    <meta name="theme-color" content="#0E7C66">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <link rel="canonical" th:href="${canonicalUrl}">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chinche Hospital | चींचे हॉस्पिटल">
+    <meta property="og:title" th:content="${pageTitle} ?: #{site.name}">
+    <meta property="og:description" th:content="${metaDescription} ?: #{site.tagline}">
+    <meta property="og:locale" th:content="${isMarathi} ? 'mr_IN' : 'en_IN'">
+    <meta property="og:image" content="/img/art/hospital-facade.svg">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="apple-touch-icon" th:href="@{/favicon.svg}">
+    <link rel="manifest" th:href="@{/site.webmanifest}">
+
+    <!-- Latin + Devanagari typefaces. System fallbacks keep the page readable
+         if the font request is blocked. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Noto+Sans+Devanagari:wght@400;500;600;700&amp;display=swap">
+
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block layout:fragment="head-extra"></th:block>
+
+    <!-- Structured data: hospital + local business -->
+    <script type="application/ld+json" th:inline="none">
+    {
+      "@context": "https://schema.org",
+      "@type": "Hospital",
+      "name": "Chinche Hospital",
+      "alternateName": "चींचे हॉस्पिटल",
+      "url": "https://chinchehospital.in",
+      "telephone": "+91-712-240-1100",
+      "email": "care@chinchehospital.in",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Mulai Road, Bus Stand Chowk",
+        "addressLocality": "Katol",
+        "addressRegion": "Maharashtra",
+        "postalCode": "441302",
+        "addressCountry": "IN"
+      },
+      "geo": { "@type": "GeoCoordinates", "latitude": 21.2705, "longitude": 78.5839 },
+      "openingHoursSpecification": [{
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "00:00", "closes": "23:59"
+      }],
+      "medicalSpecialty": ["General Medicine","Cardiology","Orthopaedics","Obstetrics","Paediatrics",
+                            "General Surgery","Neurology","Nephrology","Endocrinology","Otolaryngology",
+                            "Ophthalmology","Dermatology","Pulmonology","Urology","Psychiatry",
+                            "Dentistry","Physical Therapy","Emergency Medicine"],
+      "availableService": [
+        { "@type": "MedicalProcedure", "name": "Coronary Angioplasty" },
+        { "@type": "MedicalProcedure", "name": "Total Knee Replacement" },
+        { "@type": "MedicalProcedure", "name": "Laparoscopic Hernia Repair" },
+        { "@type": "MedicalProcedure", "name": "Haemodialysis" }
+      ],
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "1284" }
+    }
+    </script>
+</head>
+<body></body>
+</html>

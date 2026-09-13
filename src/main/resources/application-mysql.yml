@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+#  MYSQL profile — production / staging.
+#  All secrets come from the environment. Nothing sensitive is committed.
+#
+#  export DB_HOST=localhost DB_PORT=3306 DB_NAME=chinche_hospital
+#  export DB_USER=chinche DB_PASSWORD='***'
+#  java -jar target/chinche-hospital.jar --spring.profiles.active=mysql
+# ---------------------------------------------------------------------------
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:chinche_hospital}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&rewriteBatchedStatements=true&createDatabaseIfNotExist=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USER:chinche}
+    password: ${DB_PASSWORD:chinche}
+    hikari:
+      pool-name: chinche-mysql-pool
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-test-query: SELECT 1
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: false
+    hibernate:
+      # Use `validate` once db/migration is authoritative in production.
+      ddl-auto: ${JPA_DDL_AUTO:update}
+  thymeleaf:
+    cache: true
+  web:
+    resources:
+      chain:
+        strategy:
+          content:
+            enabled: true
+            paths: /**
+
+logging:
+  level:
+    root: INFO
+    in.chinche.hospital: INFO
+    org.hibernate.SQL: WARN

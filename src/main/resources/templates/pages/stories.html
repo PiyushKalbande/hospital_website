@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Patient stories</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Outcomes','Patient stories','रुग्णकथा',
+        'Published with patient consent. Names are shared only where the patient asked us to.',
+        'रुग्णांच्या संमतीने प्रकाशित.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3">
+                <article class="chh-story chh-fade" th:each="s : ${stories}">
+                    <span class="chh-chip chh-chip--ink mb-2" style="align-self:flex-start;position:relative;z-index:1"
+                          th:if="${s.speciality != null}" th:text="${s.speciality.name}">Speciality</span>
+                    <h3 class="chh-story__title" th:text="${s.title}">Title</h3>
+                    <p class="chh-small" style="color:#B9D3CC;position:relative;z-index:1" th:text="${s.summary}">Summary</p>
+                    <div class="chh-story__by">
+                        <span th:if="${s.doctor != null}">Treated by <b th:text="${s.doctor.name}">Doctor</b></span>
+                        <span th:if="${s.patientCity != null}" th:text="' · ' + ${s.patientCity}">City</span>
+                        <span th:if="${s.patientLabel != null}" th:text="' · ' + ${s.patientLabel}">Label</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

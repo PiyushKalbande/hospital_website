@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Doctors | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2">Doctors</h1>
+            <p class="chh-small chh-muted mb-0"><b th:text="${#lists.size(doctors)}">0</b> active consultants.</p></div>
+    </div>
+    <div class="chh-card">
+        <div class="table-responsive">
+            <table class="chh-table">
+                <thead><tr><th>Name</th><th>Speciality</th><th>Centre</th><th>Exp.</th><th>Fee</th><th>Video</th><th>Rating</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="d : ${doctors}">
+                    <td><div class="chh-strong" th:text="${d.name}">Name</div>
+                        <div class="chh-tiny chh-faint" th:text="${d.designation}">Designation</div></td>
+                    <td class="chh-small" th:text="${d.speciality != null} ? ${d.speciality.name} : '—'">Speciality</td>
+                    <td class="chh-small" th:text="${d.facility != null} ? ${d.facility.city} : '—'">City</td>
+                    <td class="chh-num chh-small" th:text="${d.experienceYears}">0</td>
+                    <td class="chh-num chh-small" th:text="${d.consultationFee}">₹0</td>
+                    <td><span class="chh-chip chh-chip--indigo" th:if="${d.teleconsultEnabled}">Yes</span>
+                        <span class="chh-tiny chh-faint" th:unless="${d.teleconsultEnabled}">No</span></td>
+                    <td class="chh-num chh-small" th:text="${d.rating}">0</td>
+                    <td><a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/doctors/' + ${d.slug}}">View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Contact</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Reach us','Contact & directions','संपर्क व मार्ग',
+        'For emergencies call 108 immediately. For everything else, use the form below or call the helpline.',
+        'आपत्कालीन परिस्थितीत त्वरित १०८ वर कॉल करा.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="chh-card">
+                        <div class="chh-card__body">
+                            <h2 class="chh-h3 mb-3">Send us a message</h2>
+                            <form data-enquiry>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-name" th:text="#{common.name}">Name</label>
+                                            <input class="chh-input" id="c-name" name="name" required maxlength="160">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-phone" th:text="#{common.mobile}">Mobile</label>
+                                            <input class="chh-input" id="c-phone" name="phone" inputmode="numeric" maxlength="10">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-email" th:text="#{common.email}">Email</label>
+                                            <input class="chh-input" id="c-email" name="email" type="email" maxlength="160">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-type">Enquiry type</label>
+                                            <select class="chh-select" id="c-type" name="enquiryType">
+                                                <option value="GENERAL" th:selected="${enquiryType == 'GENERAL'}">General enquiry</option>
+                                                <option value="CALLBACK" th:selected="${enquiryType == 'CALLBACK'}">Request a callback</option>
+                                                <option value="FEEDBACK" th:selected="${enquiryType == 'FEEDBACK'}">Feedback</option>
+                                                <option value="COMPLAINT" th:selected="${enquiryType == 'COMPLAINT'}">Grievance</option>
+                                                <option value="INSURANCE" th:selected="${enquiryType == 'INSURANCE'}">Insurance / TPA</option>
+                                                <option value="CAREER" th:selected="${enquiryType == 'CAREER'}">Career</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-facility" th:text="#{nav.locations}">Centre</label>
+                                            <select class="chh-select" id="c-facility" name="facilityId">
+                                                <option value="">Any</option>
+                                                <option th:each="f : ${facilities}" th:value="${f.id}" th:text="${f.name}">Facility</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-subject">Subject</label>
+                                            <input class="chh-input" id="c-subject" name="subject" maxlength="200">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="chh-field">
+                                            <label class="chh-label" for="c-msg">Message</label>
+                                            <textarea class="chh-textarea" id="c-msg" name="message" required maxlength="4000"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button class="chh-btn chh-btn--primary" type="submit">
+                                            <span th:text="#{common.submit}">Submit</span>
+                                            <svg width="16" height="16"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div data-form-status style="display:none"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="chh-stack">
+                        <div class="chh-card">
+                            <div class="chh-card__body">
+                                <h3 class="chh-h4 mb-3">Head office</h3>
+                                <ul class="chh-footer__contact" style="color:var(--chh-text-muted)">
+                                    <li><svg><use href="/img/icons/sprite.svg#pin"></use></svg>
+                                        <span th:utext="${contact.addressLine1} + '<br>' + ${contact.addressLine2} + '<br>' + #{site.city} + ' — ' + ${contact.pincode}">Address</span></li>
+                                    <li><svg><use href="/img/icons/sprite.svg#phone"></use></svg>
+                                        <span><a th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}" th:text="${contact.phone}">Phone</a></span></li>
+                                    <li><svg><use href="/img/icons/sprite.svg#ambulance"></use></svg>
+                                        <span><a th:href="'tel:108'"><b th:text="#{topbar.emergency}">Emergency</b></a>:
+                                            <span th:text="${contact.emergency}">108</span></span></li>
+                                    <li><svg><use href="/img/icons/sprite.svg#mail"></use></svg>
+                                        <span><a th:href="'mailto:' + ${contact.email}" th:text="${contact.email}">Email</a></span></li>
+                                    <li><svg><use href="/img/icons/sprite.svg#clock"></use></svg>
+                                        <span>OPD 8:00 AM – 8:00 PM<br>Emergency 24×7</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="chh-card" style="overflow:hidden">
+                            <iframe title="Map to Chinche Hospital, Katol" style="width:100%;height:280px;border:0"
+                                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://www.google.com/maps?q=Katol,+Nagpur,+Maharashtra+441302&amp;z=14&amp;output=embed"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Search</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-pagehead">
+        <div class="chh-container">
+            <h1 th:text="${q != null} ? 'Search: ' + ${q} : 'Search'">Search</h1>
+            <form class="chh-header-search mt-3" style="max-width:520px" th:action="@{/search}" method="get">
+                <svg class="chh-header-search__icon"><use href="/img/icons/sprite.svg#search"></use></svg>
+                <input type="search" name="q" th:value="${q}" th:placeholder="#{nav.search}" style="padding:14px 16px 14px 44px">
+            </form>
+        </div>
+    </section>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3" th:if="${suggestions != null and !suggestions.isEmpty()}">
+                <a class="chh-card chh-fade" th:each="s : ${suggestions}" th:href="@{${s.url}}">
+                    <div class="chh-card__body">
+                        <span class="chh-chip chh-chip--outline" th:text="${s.type}">Type</span>
+                        <h3 class="chh-h4" th:text="${s.label}">Label</h3>
+                        <p class="chh-small chh-muted mb-0" th:text="${s.sublabel}">Sublabel</p>
+                    </div>
+                </a>
+            </div>
+            <div class="chh-empty-page" th:if="${suggestions == null or suggestions.isEmpty()}">
+                <h3 th:text="#{error.404.title}">Nothing found</h3>
+                <p class="chh-lead">Try a speciality name, a doctor's name, or a condition such as diabetes.</p>
+                <a class="chh-btn chh-btn--primary" th:href="@{/}" th:text="#{error.home}">Home</a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

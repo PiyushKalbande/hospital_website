@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Reports</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Patient portal','Download your reports','अहवाल डाउनलोड करा',
+        'Lab and imaging reports are available digitally. Verify your mobile number at the front desk the first time.',
+        'प्रयोगशाळा व इमेजिंग अहवाल डिजिटल स्वरूपात उपलब्ध.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container" style="max-width:720px">
+            <div class="chh-card"><div class="chh-card__body">
+                <form data-enquiry>
+                    <div class="row g-3">
+                        <div class="col-md-6"><div class="chh-field">
+                            <label class="chh-label" for="r-name" th:text="#{common.name}">Name</label>
+                            <input class="chh-input" id="r-name" name="name" required></div></div>
+                        <div class="col-md-6"><div class="chh-field">
+                            <label class="chh-label" for="r-phone" th:text="#{common.mobile}">Registered mobile</label>
+                            <input class="chh-input" id="r-phone" name="phone" required inputmode="numeric" maxlength="10"></div></div>
+                        <div class="col-12"><div class="chh-field">
+                            <label class="chh-label" for="r-msg">Which report do you need?</label>
+                            <textarea class="chh-textarea" id="r-msg" name="message" required
+                                      placeholder="e.g. Blood report dated 12 August, patient UHID 44821"></textarea></div></div>
+                        <input type="hidden" name="enquiryType" value="GENERAL">
+                        <input type="hidden" name="subject" value="Report download request">
+                        <div class="col-12">
+                            <button class="chh-btn chh-btn--primary" type="submit" th:text="#{common.submit}">Submit</button>
+                        </div>
+                    </div>
+                    <div data-form-status style="display:none"></div>
+                </form>
+            </div></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

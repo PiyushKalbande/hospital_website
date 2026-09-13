@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Health packages</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Preventive care','Health check-up packages','आरोग्य तपासणी पॅकेज',
+        'Six packages from ₹699. Home sample collection within 25 km of Katol, reports in Marathi and English, and a physician who explains every result to you.',
+        '₹६९९ पासून सहा पॅकेज. कटोलपासून २५ किमी परिसरात घरी नमुना संकलन, मराठी व इंग्रजी अहवाल आणि डॉक्टरांकडून सविस्तर स्पष्टीकरण.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-alert chh-alert--info mb-4">
+                <svg><use href="/img/icons/sprite.svg#info"></use></svg>
+                <span>Most packages need a 10–12 hour fasting gap (water is fine). Book an early morning slot and skip breakfast.</span>
+            </div>
+
+            <div class="chh-grid-3">
+                <div class="chh-card chh-fade" th:each="p : ${packages}">
+                    <div class="chh-card__body">
+                        <div class="chh-row chh-row--between">
+                            <span class="chh-icon chh-icon--lg"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${p.iconKey}}"></use></svg></span>
+                            <span class="chh-chip chh-chip--accent" th:if="${p.featured}">Popular</span>
+                            <span class="chh-chip chh-chip--outline" th:unless="${p.featured}" th:text="${p.tier}">Tier</span>
+                        </div>
+                        <h3 class="chh-h3" th:text="${isMarathi} and ${p.nameMr != null} ? ${p.nameMr} : ${p.name}">Package</h3>
+                        <p class="chh-small chh-muted" th:text="${isMarathi} and ${p.taglineMr != null} ? ${p.taglineMr} : ${p.tagline}">Tagline</p>
+
+                        <div class="chh-row" style="gap:10px;align-items:baseline">
+                            <span class="chh-h2" style="color:var(--chh-primary)"
+                                  th:text="'₹' + ${#numbers.formatInteger(p.price, 0, 'COMMA')}">₹0</span>
+                            <span class="chh-small chh-faint" style="text-decoration:line-through" th:if="${p.listPrice != null}"
+                                  th:text="'₹' + ${#numbers.formatInteger(p.listPrice, 0, 'COMMA')}">₹0</span>
+                            <span class="chh-chip chh-chip--accent" th:if="${p.listPrice != null and p.listPrice.doubleValue() > p.price.doubleValue()}"
+                                  th:text="'Save ' + ${#numbers.formatDecimal((p.listPrice.doubleValue() - p.price.doubleValue()) * 100 / p.listPrice.doubleValue(),0,0)} + '%'">Save</span>
+                        </div>
+
+                        <ul class="chh-small chh-muted mb-0" style="padding-left:18px;line-height:1.9">
+                            <li th:each="line : ${p.includes}" th:text="${line}">Included test</li>
+                        </ul>
+
+                        <div class="chh-row mt-auto" style="gap:6px">
+                            <span class="chh-amenity" th:text="${p.testCount} + ' tests'">Tests</span>
+                            <span class="chh-amenity" th:if="${p.homeCollection}">Home collection</span>
+                            <span class="chh-amenity" th:if="${p.fastingRequired}">Fasting</span>
+                            <span class="chh-amenity" th:text="${p.reportHours} + 'h report'">Report</span>
+                        </div>
+                    </div>
+                    <div class="chh-card__foot d-flex gap-2">
+                        <a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/health-packages/' + ${p.slug}}"
+                           th:text="#{common.learnmore}">Details</a>
+                        <a class="chh-btn chh-btn--primary chh-btn--sm flex-fill"
+                           th:href="@{/book(service='HEALTH_CHECKUP',packageId=${p.id})}" th:text="#{common.booknow}">Book</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

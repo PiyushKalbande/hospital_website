@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Centres | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head"><div><h1 class="chh-h2">Centres</h1>
+        <p class="chh-small chh-muted mb-0"><b th:text="${#lists.size(facilities)}">0</b> locations.</p></div></div>
+    <div class="chh-grid-3">
+        <div class="chh-card" th:each="f : ${facilities}">
+            <div class="chh-card__body">
+                <div class="chh-row chh-row--between">
+                    <h2 class="chh-h4 mb-0" th:text="${f.name}">Facility</h2>
+                    <span class="chh-chip" th:if="${f.headquarter}">HQ</span>
+                </div>
+                <p class="chh-small chh-muted mb-1" th:text="${f.addressLine}">Address</p>
+                <p class="chh-tiny chh-faint mb-2" th:text="${f.hoursText}">Hours</p>
+                <div class="chh-row" style="gap:6px">
+                    <span class="chh-amenity" th:text="${f.facilityType != null} ? ${f.facilityType.label} : '—'">Type</span>
+                    <span class="chh-amenity" th:if="${f.bedCount != null and f.bedCount > 0}" th:text="${f.bedCount} + ' beds'">Beds</span>
+                    <span class="chh-amenity" th:if="${f.rating != null}" th:text="'★ ' + ${f.rating}">Rating</span>
+                </div>
+            </div>
+            <div class="chh-card__foot">
+                <a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/locations/' + ${f.slug}}">View page</a>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

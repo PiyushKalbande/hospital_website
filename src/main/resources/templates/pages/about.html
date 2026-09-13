@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">About</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Since 1998','About Chinche Hospital','चींचे हॉस्पिटलविषयी',
+        'A family-run multispeciality hospital that has served Katol taluka for more than a quarter of a century.',
+        'गेली २७ वर्षे कटोल तालुक्याची सेवा करणारे कौटुंबिक रुग्णालय.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    <h2 class="chh-h2 mb-3">Tertiary care that stays in the taluka</h2>
+                    <p class="chh-lead">Chinche Hospital began in 1998 as a twelve-bed nursing home on Mulai Road.
+                        Today it is a 120-bed multispeciality hospital with an intensive care unit, four operating theatres,
+                        a dialysis unit, a neonatal unit and an NABL-accredited laboratory — all within Katol.</p>
+                    <p>The reason is simple. For decades, a family here with a heart attack, a fracture or a complicated
+                        pregnancy had to travel 55 kilometres to Nagpur. That journey costs money, costs time, and
+                        sometimes costs a life. We built the capability here so that journey is no longer necessary.</p>
+                    <p>Our consultants live in the region or visit on fixed weekly days. Our nursing staff are largely
+                        from Katol taluka itself. Our reports are explained in Marathi, because a report nobody understands
+                        is not care.</p>
+
+                    <h3 class="chh-h3 mt-4 mb-2">What we are accountable for</h3>
+                    <div class="chh-grid-2">
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                            <span>Published price estimates before every elective surgery — no surprise billing.</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                            <span>Infection-control audits and biomedical waste compliance reviewed quarterly.</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                            <span>A patient grievance cell that must acknowledge every complaint within 24 hours.</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                            <span>Cashless treatment under Jan Arogya Yojana and most major TPAs.</span></div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="chh-card mb-3">
+                        <div class="chh-card__body">
+                            <h3 class="chh-h4 mb-3">At a glance</h3>
+                            <div class="chh-stats" style="grid-template-columns:1fr 1fr">
+                                <div class="chh-stat"><div class="chh-stat__num">1998</div><div class="chh-stat__label">Established</div></div>
+                                <div class="chh-stat"><div class="chh-stat__num">120</div><div class="chh-stat__label" th:text="#{section.stats.beds}">Beds</div></div>
+                                <div class="chh-stat"><div class="chh-stat__num">4</div><div class="chh-stat__label">Operating theatres</div></div>
+                                <div class="chh-stat"><div class="chh-stat__num">24×7</div><div class="chh-stat__label" th:text="#{nav.emergency}">Emergency</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chh-card">
+                        <div class="chh-card__body">
+                            <h3 class="chh-h4 mb-3" th:text="#{section.awards.title}">Accreditation</h3>
+                            <div class="chh-stack">
+                                <div class="chh-award" th:each="a : ${awards}">
+                                    <span class="chh-icon chh-icon--accent"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${a.iconKey}}"></use></svg></span>
+                                    <span>
+                                        <span class="chh-award__title d-block" th:text="${a.title}">Award</span>
+                                        <span class="chh-award__meta d-block" th:text="${a.issuer} + ' · ' + ${a.awardYear}">Issuer</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

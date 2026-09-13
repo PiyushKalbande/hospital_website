@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Conditions</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Symptom guide','Conditions we treat','आम्ही उपचार करत असलेले आजार',
+        'Common health concerns managed at our OPD, with the department that handles each one.',
+        'आमच्या ओ.पी.डी.मध्ये हाताळले जाणारे सामान्य आजार.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-catgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">
+                <a class="chh-catcard chh-fade" th:each="c : ${conditions}" th:href="@{'/conditions/' + ${c.slug}}">
+                    <span class="chh-icon chh-icon--lg"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${c.iconKey}}"></use></svg></span>
+                    <span class="chh-catcard__name" th:text="${c.name}">Condition</span>
+                    <span class="chh-catcard__sub chh-mr" th:if="${c.nameMr != null}" th:text="${c.nameMr}">मराठी</span>
+                    <span class="chh-catcard__meta" th:if="${c.speciality != null}" th:text="${c.speciality.name}">Speciality</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

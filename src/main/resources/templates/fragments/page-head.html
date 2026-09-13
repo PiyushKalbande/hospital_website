@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Reusable page header: breadcrumb + title + intro + optional side actions -->
+<div class="chh-pagehead" th:fragment="head(eyebrow, title, titleMr, intro, introMr)">
+    <div class="chh-container">
+        <nav class="chh-breadcrumb mb-2" aria-label="Breadcrumb">
+            <a th:href="@{/}" th:text="#{nav.home}">Home</a>
+            <span>/</span>
+            <span th:if="${breadcrumb}" th:text="${breadcrumb}">Section</span>
+        </nav>
+        <div class="d-flex align-items-end justify-content-between gap-4 flex-wrap">
+            <div style="max-width:760px">
+                <span class="chh-eyebrow" th:if="${eyebrow}" th:text="${eyebrow}">Eyebrow</span>
+                <h1 class="mt-2" th:text="${isMarathi} and ${titleMr != null} ? ${titleMr} : ${title}">Title</h1>
+                <p class="chh-lead mt-2 mb-0"
+                   th:if="${intro != null}"
+                   th:text="${isMarathi} and ${introMr != null} ? ${introMr} : ${intro}">Intro</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="chh-btn chh-btn--primary" th:href="@{/book}">
+                    <svg width="16" height="16"><use href="/img/icons/sprite.svg#calendar"></use></svg>
+                    <span th:text="#{nav.book}">Book appointment</span>
+                </a>
+                <a class="chh-btn chh-btn--outline" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
+                    <svg width="16" height="16"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                    <span th:text="${contact.phone}">Call</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Doctor card reused across listing pages -->
+<article class="chh-card chh-doccard" th:fragment="doctorCard(d)">
+    <div class="chh-card__body">
+        <div class="chh-doccard__top">
+            <div class="chh-doccard__avatar"
+                 th:with="nm=${d.name != null} ? ${#strings.replace(d.name,'Dr. ','')} : ${''}"
+                 th:text="${#strings.isEmpty(nm)} ? '?'
+                          : ${#strings.toUpperCase(#strings.substring(nm,0,1))}
+                            + (${#strings.length(nm) > 1}
+                                and ${nm.contains(' ')}
+                               ? ${#strings.toUpperCase(#strings.substring(nm,nm.indexOf(' ')+1,nm.indexOf(' ')+2))}
+                               : (${#strings.length(nm) > 1}
+                                  ? ${#strings.toUpperCase(#strings.substring(nm,1,2))} : ''))">AB</div>
+            <div style="min-width:0">
+                <div class="chh-doccard__name">
+                    <a th:href="@{'/doctors/' + ${d.slug}}" th:text="${d.name}">Doctor</a>
+                </div>
+                <div class="chh-doccard__role" th:text="${d.designation}">Designation</div>
+                <div class="chh-doccard__quals" th:text="${d.qualifications}">Qualifications</div>
+            </div>
+        </div>
+        <div class="chh-doccard__facts">
+            <span class="chh-chip" th:if="${d.specialityName != null}" th:text="${d.specialityName}">Speciality</span>
+            <span class="chh-chip chh-chip--outline" th:if="${d.experienceYears != null}"
+                  th:text="${d.experienceYears} + ' ' + #{common.experience}">Years</span>
+            <span class="chh-chip chh-chip--indigo" th:if="${d.teleconsultEnabled}" th:text="#{common.teleconsult}">Video</span>
+            <span class="chh-rating" th:if="${d.rating != null}">
+                <svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                <span th:text="${#numbers.formatDecimal(d.rating,1,1)}">4.8</span>
+            </span>
+        </div>
+        <p class="chh-small chh-muted mt-2 mb-0" th:if="${d.bio != null}"
+           th:text="${#strings.abbreviate(d.bio,150)}">Bio</p>
+    </div>
+    <div class="chh-card__foot chh-doccard__foot">
+        <span class="chh-doccard__fee">
+            <b th:text="${d.consultationFee != null and d.consultationFee.doubleValue() > 0}
+                        ? '₹' + ${#numbers.formatInteger(d.consultationFee, 0, 'COMMA')} : '—'">₹500</b>
+            <span th:text="#{common.consultation}">Consultation</span>
+        </span>
+        <span class="d-flex gap-2">
+            <a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/doctors/' + ${d.slug}}"
+               th:text="#{common.learnmore}">Profile</a>
+            <a class="chh-btn chh-btn--primary chh-btn--sm" th:href="@{/book(doctorId=${d.id})}"
+               th:text="#{common.booknow}">Book</a>
+        </span>
+    </div>
+</article>
+
+<!-- Pagination -->
+<!--
+  Pagination takes plain scalars rather than a page object: callers pass either a
+  Spring Data Page (.number) or our PageDto (.page), and SpEL throws on a missing
+  property instead of returning null, so the fragment must not guess the type.
+-->
+<nav th:fragment="pagination(currentPage, totalPages, baseUrl)"
+     th:if="${totalPages != null and totalPages > 1}"
+     class="d-flex justify-content-center mt-4">
+    <div class="chh-tabbar">
+        <a th:if="${currentPage > 0}" th:href="@{${baseUrl}(page=${currentPage - 1})}"
+           th:text="#{common.prev}">Previous</a>
+        <button type="button" disabled
+                th:text="#{common.page} + ' ' + (${currentPage} + 1) + ' / ' + ${totalPages}">Page</button>
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{${baseUrl}(page=${currentPage + 1})}"
+           th:text="#{common.next}">Next</a>
+    </div>
+</nav>
+
+</body>
+</html>

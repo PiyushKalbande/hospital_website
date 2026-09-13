@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Doctor</title></head>
+<body>
+<main layout:fragment="content">
+
+    <section class="chh-profile-hero">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/doctors}" th:text="#{nav.doctors}">Doctors</a><span>/</span>
+                <span th:text="${doctor.name}">Name</span>
+            </nav>
+
+            <div class="chh-profile-hero__inner">
+                <div class="chh-profile-avatar" th:with="nm=${doctor.name != null} ? ${#strings.replace(doctor.name,'Dr. ','')} : ${''}"
+                                     th:text="${#strings.isEmpty(nm)} ? '?' : ${#strings.toUpperCase(#strings.substring(nm,0,1))} + (${#strings.length(nm) > 1} ? ${#strings.toUpperCase(#strings.substring(nm,1,2))} : '')">AB</div>
+                <div style="flex:1 1 380px;min-width:0">
+                    <div class="chh-row mb-2">
+                        <span class="chh-chip" th:if="${doctor.speciality != null}" th:text="${doctor.speciality.name}">Speciality</span>
+                        <span class="chh-chip chh-chip--indigo" th:if="${doctor.teleconsultEnabled}" th:text="#{common.teleconsult}">Video</span>
+                        <span class="chh-rating" th:if="${doctor.rating != null}">
+                            <svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                            <span th:text="${#numbers.formatDecimal(doctor.rating,1,1)}">4.8</span>
+                            <span class="chh-faint chh-tiny" th:text="'(' + ${doctor.reviewCount} + ' ' + #{common.reviews} + ')'">(200 reviews)</span>
+                        </span>
+                    </div>
+                    <h1 th:text="${doctor.name}">Doctor name</h1>
+                    <p class="chh-lead mt-1 mb-0" th:text="${doctor.designation}">Designation</p>
+                    <p class="chh-small chh-muted mt-1" th:text="${doctor.qualifications}">Qualifications</p>
+
+                    <div class="chh-row mt-3">
+                        <a class="chh-btn chh-btn--primary chh-btn--lg" th:href="@{/book(doctorId=${doctor.id})}">
+                            <svg width="17" height="17"><use href="/img/icons/sprite.svg#calendar"></use></svg>
+                            <span th:text="#{nav.book}">Book appointment</span>
+                        </a>
+                        <a class="chh-btn chh-btn--outline chh-btn--lg" th:if="${doctor.teleconsultEnabled}"
+                           th:href="@{/book(doctorId=${doctor.id},service='TELE_CONSULTATION')}">
+                            <svg width="17" height="17"><use href="/img/icons/sprite.svg#video"></use></svg>
+                            <span th:text="#{common.teleconsult}">Video consult</span>
+                        </a>
+                        <a class="chh-btn chh-btn--ghost chh-btn--lg" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
+                            <svg width="17" height="17"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                            <span th:text="#{common.call}">Call</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <dl class="chh-profile-meta">
+                <div><dt th:text="#{common.experience}">Experience</dt>
+                     <dd><span th:text="${doctor.experienceYears}">15</span> years</dd></div>
+                <div><dt th:text="#{common.languages}">Languages</dt>
+                     <dd th:text="${doctor.languagesDisplay}">मराठी, हिंदी, English</dd></div>
+                <div><dt th:text="#{common.registration}">Registration</dt>
+                     <dd class="chh-mono" th:text="${doctor.registrationNo}">MMC-…</dd></div>
+                <div><dt th:text="#{booking.fee}">Consultation fee</dt>
+                     <dd th:text="${doctor.consultationFee != null and doctor.consultationFee.doubleValue() > 0}
+                                  ? '₹' + ${#numbers.formatInteger(doctor.consultationFee, 0, 'COMMA')} : '—'">₹500</dd></div>
+                <div th:if="${doctor.facility != null}"><dt th:text="#{nav.locations}">Centre</dt>
+                     <dd th:text="${doctor.facility.name}">Facility</dd></div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <h2 class="chh-h3 mb-3">About</h2>
+                    <p class="chh-lead" th:text="${doctor.bio}">Bio</p>
+
+                    <div th:if="${doctor.expertiseList != null and !doctor.expertiseList.isEmpty()}">
+                        <h3 class="chh-h4 mt-4 mb-2" th:text="#{common.expertise}">Areas of expertise</h3>
+                        <div class="chh-row">
+                            <span class="chh-chip" th:each="e : ${doctor.expertiseList}" th:text="${e}">Expertise</span>
+                        </div>
+                    </div>
+
+                    <div th:if="${doctor.speciality != null}" class="chh-alert chh-alert--info mt-4">
+                        <svg><use href="/img/icons/sprite.svg#info"></use></svg>
+                        <span>
+                            <a th:href="@{'/specialities/' + ${doctor.speciality.slug}}"
+                               th:text="${doctor.speciality.name}">Speciality</a> —
+                            <span th:text="${doctor.speciality.summary}">summary</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="chh-card">
+                        <div class="chh-card__body">
+                            <h3 class="chh-h4" th:text="#{common.weekly.schedule}">Weekly schedule</h3>
+                            <p class="chh-small chh-muted">Slots are shown live while you book; this is the recurring weekly pattern.</p>
+                            <div class="table-responsive">
+                                <table class="chh-schedule">
+                                    <thead><tr><th>Day</th><th>Hours</th><th>Mode</th></tr></thead>
+                                    <tbody>
+                                    <tr th:each="s : ${weeklySchedule}">
+                                        <td class="chh-strong" th:text="${#strings.capitalize(#strings.toLowerCase(s.dayOfWeek.name()))}">Monday</td>
+                                        <td class="chh-num"
+                                            th:text="${#temporals.format(s.startTime,'h:mm a')} + ' – ' + ${#temporals.format(s.endTime,'h:mm a')}">9:00 – 13:00</td>
+                                        <td>
+                                            <span class="chh-chip chh-chip--indigo" th:if="${s.teleconsult}">Video</span>
+                                            <span class="chh-chip chh-chip--outline" th:unless="${s.teleconsult}">In person</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(weeklySchedule)}">
+                                        <td colspan="3" class="chh-muted">Schedule not published yet — call the helpline.</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="chh-card__foot">
+                            <a class="chh-btn chh-btn--primary chh-btn--block" th:href="@{/book(doctorId=${doctor.id})}"
+                               th:text="#{nav.book}">Book appointment</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${colleagues != null and #lists.size(colleagues) > 1}" class="mt-5">
+                <div class="chh-section-head">
+                    <div class="chh-section-head__title">
+                        <span class="chh-eyebrow">Same department</span>
+                        <h2 class="chh-h3">Other specialists</h2>
+                    </div>
+                </div>
+                <div class="chh-grid-3">
+                    <th:block th:each="c : ${colleagues}">
+                        <th:block th:unless="${c.id == doctor.id}">
+                            <div th:replace="~{fragments/page-head :: doctorCard(${c})}"></div>
+                        </th:block>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

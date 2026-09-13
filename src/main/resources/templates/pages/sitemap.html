@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Sitemap</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-pagehead"><div class="chh-container"><h1>Sitemap</h1>
+        <p class="chh-lead mt-2 mb-0">Every public page on this site.</p></div></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.specialities}">Specialities</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="s : ${specialities}"><a th:href="@{'/specialities/' + ${s.slug}}" th:text="${s.name}">S</a></li>
+                    </ul></div>
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.doctors}">Doctors</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="d : ${doctors}"><a th:href="@{'/doctors/' + ${d.slug}}" th:text="${d.name}">D</a></li>
+                    </ul></div>
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.procedures}">Treatments</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="p : ${procedures}"><a th:href="@{'/procedures/' + ${p.slug}}" th:text="${p.name}">P</a></li>
+                    </ul>
+                    <h3 class="chh-h4 mb-2 mt-4" th:text="#{nav.packages}">Packages</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="p : ${packages}"><a th:href="@{'/health-packages/' + ${p.slug}}" th:text="${p.name}">P</a></li>
+                    </ul></div>
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.locations}">Centres</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="f : ${facilities}"><a th:href="@{'/locations/' + ${f.slug}}" th:text="${f.name}">F</a></li>
+                    </ul></div>
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.blogs}">Blogs</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="b : ${blogs}"><a th:href="@{'/blogs/' + ${b.slug}}" th:text="${#strings.abbreviate(b.title,60)}">B</a></li>
+                    </ul></div>
+                <div class="col-md-4"><h3 class="chh-h4 mb-2" th:text="#{nav.news}">Updates</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="a : ${announcements}"><a th:href="@{'/announcements/' + ${a.slug}}" th:text="${#strings.abbreviate(a.title,60)}">A</a></li>
+                    </ul>
+                    <h3 class="chh-h4 mb-2 mt-4" th:text="#{nav.stories}">Stories</h3>
+                    <ul class="chh-footer__list" style="color:var(--chh-text)">
+                        <li th:each="s : ${stories}"><a th:href="@{/patient-stories}" th:text="${#strings.abbreviate(s.title,60)}">S</a></li>
+                    </ul></div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

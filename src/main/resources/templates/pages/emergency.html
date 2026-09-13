@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Emergency</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-section" style="background:linear-gradient(150deg,#FDF3F1,#fff 65%)">
+        <div class="chh-container" style="max-width:900px;text-align:center">
+            <span class="chh-icon chh-icon--lg chh-icon--clay mx-auto mb-3" style="width:76px;height:76px">
+                <svg style="width:38px;height:38px"><use href="/img/icons/sprite.svg#ambulance"></use></svg>
+            </span>
+            <h1 th:text="#{topbar.emergency}">24×7 Emergency</h1>
+            <p class="chh-lead mt-2">If this is a medical emergency, do not fill in a form. Call now.</p>
+            <div class="chh-row mt-4" style="justify-content:center">
+                <a class="chh-btn chh-btn--danger chh-btn--lg" href="tel:108" style="font-size:1.2rem;padding:18px 36px">
+                    <svg width="22" height="22"><use href="/img/icons/sprite.svg#phone"></use></svg> 108
+                </a>
+                <a class="chh-btn chh-btn--ink chh-btn--lg" th:href="'tel:919422100108'" style="font-size:1.05rem;padding:18px 30px">
+                    <svg width="20" height="20"><use href="/img/icons/sprite.svg#ambulance"></use></svg>
+                    <span th:text="${contact.emergency}">Ambulance</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3">
+                <div class="chh-card"><div class="chh-card__body">
+                    <span class="chh-icon chh-icon--clay"><svg><use href="/img/icons/sprite.svg#heart"></use></svg></span>
+                    <h3 class="chh-h4">Chest pain fast-track</h3>
+                    <p class="chh-small chh-muted mb-0">ECG within 10 minutes of arrival, cardiology on call, angioplasty arranged same evening when indicated.</p>
+                </div></div>
+                <div class="chh-card"><div class="chh-card__body">
+                    <span class="chh-icon chh-icon--indigo"><svg><use href="/img/icons/sprite.svg#brain"></use></svg></span>
+                    <h3 class="chh-h4">Stroke fast-track</h3>
+                    <p class="chh-small chh-muted mb-0">Thrombolysis within the golden hour, CT on site, and structured rehabilitation afterwards.</p>
+                </div></div>
+                <div class="chh-card"><div class="chh-card__body">
+                    <span class="chh-icon"><svg><use href="/img/icons/sprite.svg#bone"></use></svg></span>
+                    <h3 class="chh-h4">Trauma &amp; accidents</h3>
+                    <p class="chh-small chh-muted mb-0">Ambulance with ventilator support for the Katol–Nagpur highway, orthopaedic surgeon on call round the clock.</p>
+                </div></div>
+            </div>
+            <div class="chh-alert chh-alert--warn mt-4">
+                <svg><use href="/img/icons/sprite.svg#alert"></use></svg>
+                <span>Do not drive yourself for chest pain, stroke symptoms, severe bleeding or breathing difficulty. Call 108 and let the ambulance come to you.</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

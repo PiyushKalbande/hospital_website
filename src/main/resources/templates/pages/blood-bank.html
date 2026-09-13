@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Blood bank</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Donor services','Blood bank & donor registration','रक्तपेढी',
+        'We coordinate with the Nagpur district blood bank and maintain a voluntary donor register for Katol taluka.',
+        'नागपूर जिल्हा रक्तपेढीशी समन्वय व स्वयंसेवी दात्यांची नोंद.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h2 class="chh-h3 mb-3">Register as a voluntary donor</h2>
+                    <div class="chh-card"><div class="chh-card__body">
+                        <form data-enquiry>
+                            <div class="row g-3">
+                                <div class="col-md-6"><div class="chh-field">
+                                    <label class="chh-label" for="b-name" th:text="#{common.name}">Name</label>
+                                    <input class="chh-input" id="b-name" name="name" required></div></div>
+                                <div class="col-md-6"><div class="chh-field">
+                                    <label class="chh-label" for="b-phone" th:text="#{common.mobile}">Mobile</label>
+                                    <input class="chh-input" id="b-phone" name="phone" required inputmode="numeric" maxlength="10"></div></div>
+                                <div class="col-12"><div class="chh-field">
+                                    <label class="chh-label" for="b-msg">Blood group and last donation date</label>
+                                    <input class="chh-input" id="b-msg" name="message" required placeholder="e.g. B+ , last donated March 2026"></div></div>
+                                <input type="hidden" name="enquiryType" value="GENERAL">
+                                <input type="hidden" name="subject" value="Blood donor registration">
+                                <div class="col-12"><button class="chh-btn chh-btn--primary" type="submit" th:text="#{common.submit}">Submit</button></div>
+                            </div>
+                            <div data-form-status style="display:none"></div>
+                        </form>
+                    </div></div>
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="chh-h3 mb-3">Need blood urgently?</h2>
+                    <div class="chh-alert chh-alert--err mb-3">
+                        <svg><use href="/img/icons/sprite.svg#ambulance"></use></svg>
+                        <span>Call the emergency desk first: <a href="tel:108"><b>108</b></a> or
+                            <b th:text="${contact.emergency}">+91 94221 00108</b>. Do not wait for this form.</span>
+                    </div>
+                    <ul class="chh-small chh-muted" style="line-height:2">
+                        <li>Donors must be 18–60 years, above 50 kg, and free of infection.</li>
+                        <li>Whole-blood donation interval is 90 days for men, 120 days for women.</li>
+                        <li>Our donor register is used only for matching requests — never shared commercially.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

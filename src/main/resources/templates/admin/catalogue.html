@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Catalogue | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2">Catalogue</h1>
+            <p class="chh-small chh-muted mb-0">Clinical catalogue that drives the public site and the booking widget.</p></div>
+    </div>
+
+    <div class="chh-kpis">
+        <div class="chh-kpi"><div class="chh-kpi__label">Specialities</div><div class="chh-kpi__value" th:text="${#lists.size(specialities)}">0</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Procedures</div><div class="chh-kpi__value" th:text="${#lists.size(procedures)}">0</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Conditions</div><div class="chh-kpi__value" th:text="${#lists.size(conditions)}">0</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Packages</div><div class="chh-kpi__value" th:text="${#lists.size(packages)}">0</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Lab tests</div><div class="chh-kpi__value" th:text="${#lists.size(labTests)}">0</div></div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="chh-card"><div class="chh-card__body">
+                <h2 class="chh-h4 mb-3">Specialities</h2>
+                <div class="table-responsive"><table class="chh-table">
+                    <thead><tr><th>Name</th><th>मराठी</th><th>Featured</th></tr></thead>
+                    <tbody><tr th:each="s : ${specialities}">
+                        <td class="chh-strong" th:text="${s.name}">Name</td>
+                        <td class="chh-mr chh-small" th:text="${s.nameMr}">मराठी</td>
+                        <td><span class="chh-chip" th:if="${s.featured}">Yes</span></td>
+                    </tr></tbody>
+                </table></div>
+            </div></div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chh-card"><div class="chh-card__body">
+                <h2 class="chh-h4 mb-3">Health packages</h2>
+                <div class="table-responsive"><table class="chh-table">
+                    <thead><tr><th>Package</th><th>Tier</th><th>Price</th><th>Tests</th></tr></thead>
+                    <tbody><tr th:each="p : ${packages}">
+                        <td class="chh-strong" th:text="${p.name}">Name</td>
+                        <td><span class="chh-chip chh-chip--outline" th:text="${p.tier}">Tier</span></td>
+                        <td class="chh-num" th:text="'₹' + ${p.price}">₹0</td>
+                        <td class="chh-num" th:text="${p.testCount}">0</td>
+                    </tr></tbody>
+                </table></div>
+            </div></div>
+        </div>
+        <div class="col-12">
+            <div class="chh-card"><div class="chh-card__body">
+                <h2 class="chh-h4 mb-3">Lab tests</h2>
+                <div class="table-responsive"><table class="chh-table">
+                    <thead><tr><th>Test</th><th>Category</th><th>Sample</th><th>Report</th><th>Fasting</th><th>Price</th></tr></thead>
+                    <tbody><tr th:each="l : ${labTests}">
+                        <td class="chh-strong" th:text="${l.name}">Test</td>
+                        <td class="chh-small" th:text="${l.category}">Cat</td>
+                        <td class="chh-small" th:text="${l.sampleType}">Sample</td>
+                        <td class="chh-small chh-num" th:text="${l.reportHours} + ' h'">h</td>
+                        <td class="chh-small" th:text="${l.fastingRequired} ? 'Yes' : 'No'">No</td>
+                        <td class="chh-num" th:text="'₹' + ${l.price}">₹0</td>
+                    </tr></tbody>
+                </table></div>
+            </div></div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Our centres</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Our network','Centres across Katol taluka','कटोल तालुक्यातील आमची केंद्रे',
+        'One 120-bed hospital, two clinics and a diagnostics centre — so routine care never needs a trip to Nagpur.',
+        '१२० खाटांचे रुग्णालय, दोन क्लिनिक व एक निदान केंद्र.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3">
+                <article class="chh-card chh-fade" th:each="f : ${facilities}">
+                    <div class="chh-facility-card__media" style="height:150px">
+                        <img th:src="@{/img/art/facility-bg.svg}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+                        <span class="chh-facility-card__badge" th:text="${f.facilityType != null} ? ${f.facilityType.label} : 'Centre'">Type</span>
+                        <span class="chh-facility-card__rating" th:if="${f.rating != null}">
+                            <svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                            <span th:text="${#numbers.formatDecimal(f.rating,1,1)}">4.7</span>
+                            <span class="chh-tiny" th:if="${f.reviewCount != null}" th:text="'(' + ${f.reviewCount} + ')'"></span>
+                        </span>
+                    </div>
+                    <div class="chh-card__body">
+                        <h3 class="chh-h3">
+                            <a th:href="@{'/locations/' + ${f.slug}}"
+                               th:text="${isMarathi} and ${f.nameMr != null} ? ${f.nameMr} : ${f.name}">Facility</a>
+                        </h3>
+                        <p class="chh-small chh-muted mb-2" style="display:flex;gap:7px">
+                            <svg width="15" height="15" style="flex:0 0 15px;margin-top:3px"><use href="/img/icons/sprite.svg#pin"></use></svg>
+                            <span th:text="${f.addressLine}">Address</span>
+                        </p>
+                        <p class="chh-small chh-muted mb-2" style="display:flex;gap:7px">
+                            <svg width="15" height="15" style="flex:0 0 15px;margin-top:3px"><use href="/img/icons/sprite.svg#clock"></use></svg>
+                            <span th:text="${f.hoursText}">Hours</span>
+                        </p>
+                        <div class="chh-facility-card__amenities" th:if="${f.amenities != null}">
+                            <span class="chh-amenity" th:each="a : ${#strings.arraySplit(f.amenities,',')}"
+                                  th:text="${#strings.toUpperCase(a)}">Amenity</span>
+                        </div>
+                    </div>
+                    <div class="chh-card__foot d-flex gap-2 flex-wrap">
+                        <a class="chh-btn chh-btn--outline chh-btn--sm" th:href="'tel:' + ${#strings.replace(f.phone,' ','')}">
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                            <span th:text="${f.phone}">Phone</span>
+                        </a>
+                        <a class="chh-btn chh-btn--ghost chh-btn--sm" target="_blank" rel="noopener"
+                           th:href="'https://www.google.com/maps/search/?api=1&amp;query=' + ${f.latitude} + ',' + ${f.longitude}"
+                           th:text="#{common.directions}">Directions</a>
+                        <a class="chh-btn chh-btn--primary chh-btn--sm ms-auto" th:href="@{/book(facilityId=${f.id})}"
+                           th:text="#{common.booknow}">Book</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Doctors</title></head>
+<body>
+<main layout:fragment="content">
+
+    <div th:replace="~{fragments/page-head :: head('Our panel','Find a doctor','डॉक्टर शोधा',
+        'Search ' + ${doctorCount} + ' specialists by name, speciality or centre. Video consultation is available for most departments.',
+        'नाव, विभाग किंवा केंद्रानुसार तज्ज्ञ डॉक्टर शोधा. बहुतांश विभागांसाठी व्हिडिओ सल्ला उपलब्ध आहे.')}"></div>
+
+    <section class="chh-section chh-section--tight">
+        <div class="chh-container">
+            <form class="chh-card mb-4" method="get" th:action="@{/doctors}" style="box-shadow:none">
+                <div class="chh-card__body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <label class="chh-label" for="f-q" th:text="#{nav.search}">Search</label>
+                            <input class="chh-input" id="f-q" name="q" th:value="${q}"
+                                   placeholder="Name, speciality or qualification">
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="chh-label" for="f-spec" th:text="#{nav.specialities}">Speciality</label>
+                            <select class="chh-select" id="f-spec" name="specialityId">
+                                <option value="" th:text="#{section.viewall}">All</option>
+                                <option th:each="s : ${specialities}" th:value="${s.id}"
+                                        th:selected="${specialityId != null and specialityId == s.id}"
+                                        th:text="${isMarathi} and ${s.nameMr != null} ? ${s.nameMr} : ${s.name}">Speciality</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="chh-label" for="f-fac" th:text="#{nav.locations}">Centre</label>
+                            <select class="chh-select" id="f-fac" name="facilityId">
+                                <option value="" th:text="#{section.viewall}">All</option>
+                                <option th:each="f : ${facilities}" th:value="${f.id}"
+                                        th:selected="${facilityId != null and facilityId == f.id}"
+                                        th:text="${isMarathi} and ${f.nameMr != null} ? ${f.nameMr} : ${f.name}">Facility</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 d-flex align-items-end gap-2">
+                            <button class="chh-btn chh-btn--primary flex-fill" type="submit">
+                                <svg width="16" height="16"><use href="/img/icons/sprite.svg#search"></use></svg>
+                                <span th:text="#{common.search}">Search</span>
+                            </button>
+                            <a class="chh-btn chh-btn--ghost chh-btn--icon" th:href="@{/doctors}"
+                               th:title="#{common.clear}">
+                                <svg width="16" height="16"><use href="/img/icons/sprite.svg#close"></use></svg>
+                            </a>
+                        </div>
+                        <div class="col-12">
+                            <label class="chh-check">
+                                <input type="checkbox" name="teleconsultOnly" value="true"
+                                       th:checked="${teleconsultOnly}">
+                                <span th:text="#{common.teleconsult}">Video consult available</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="chh-row chh-row--between mb-3">
+                <span class="chh-small chh-muted">
+                    <b th:text="${results.totalElements}">0</b> <span th:text="#{common.results}">results</span>
+                </span>
+            </div>
+
+            <div class="chh-grid-3" th:if="${results.totalElements > 0}">
+                <!-- th:each must sit on a wrapper: th:replace has higher precedence
+                     and would otherwise render the fragment once with a null argument. -->
+                <th:block th:each="d : ${results.content}">
+                    <div th:replace="~{fragments/page-head :: doctorCard(${d})}"></div>
+                </th:block>
+            </div>
+
+            <div class="chh-empty-page" th:unless="${results.totalElements > 0}">
+                <span class="chh-empty__icon" style="margin:0 auto 16px"><svg><use href="/img/icons/sprite.svg#user"></use></svg></span>
+                <h3>No doctors match those filters</h3>
+                <p class="chh-lead">Try clearing the search, or call our helpline and we will connect you to the right specialist.</p>
+                <a class="chh-btn chh-btn--primary" th:href="@{/doctors}" th:text="#{common.clear}">Clear filters</a>
+            </div>
+
+            <div th:replace="~{fragments/page-head :: pagination(${results.page}, ${results.totalPages}, '/doctors')}"></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

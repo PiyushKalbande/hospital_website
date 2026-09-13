@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Appointments | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2">Appointments</h1>
+            <p class="chh-small chh-muted mb-0"><b th:text="${appointments.totalElements}">0</b> matching bookings.</p></div>
+    </div>
+
+    <form class="chh-card mb-3" method="get" th:action="@{/admin/appointments}" style="box-shadow:none">
+        <div class="chh-card__body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4"><label class="chh-label" for="a-status">Status</label>
+                    <select class="chh-select" id="a-status" name="status">
+                        <option value="">All</option>
+                        <option th:each="s : ${statuses}" th:value="${s.name()}" th:selected="${status == s.name()}"
+                                th:text="${s.label}">Status</option>
+                    </select></div>
+                <div class="col-md-4"><label class="chh-label" for="a-date">Date</label>
+                    <input class="chh-input" id="a-date" name="date" type="date" th:value="${date}"></div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="chh-btn chh-btn--primary" type="submit">Filter</button>
+                    <a class="chh-btn chh-btn--ghost" th:href="@{/admin/appointments}">Clear</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="chh-card">
+        <div class="table-responsive">
+            <table class="chh-table">
+                <thead><tr><th>Ref</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Slot</th><th>Service</th>
+                    <th>Mode</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${appointments.content}">
+                    <td class="chh-mono chh-tiny" th:text="${a.referenceNo}">CHH-…</td>
+                    <td><div class="chh-strong" th:text="${a.patient.fullName}">Name</div>
+                        <div class="chh-tiny chh-faint" th:text="${a.patient.phone}">Phone</div></td>
+                    <td class="chh-small" th:text="${a.doctor != null} ? ${a.doctor.name} : '—'">Doctor</td>
+                    <td class="chh-small chh-num" th:text="${a.appointmentDate}">Date</td>
+                    <td class="chh-small chh-num" th:text="${a.slotDisplay}">Slot</td>
+                    <td><span class="chh-chip chh-chip--outline" th:text="${a.serviceType.label}">Type</span></td>
+                    <td class="chh-tiny" th:text="${a.visitMode.label}">Mode</td>
+                    <td class="chh-small chh-num" th:text="${a.amountPayable != null} ? '₹' + ${a.amountPayable} : '—'">₹0</td>
+                    <td><span class="chh-status" th:classappend="'chh-status--' + ${#strings.toLowerCase(a.status.name())}"
+                              th:text="${a.status.label}">Status</span></td>
+                    <td>
+                        <form th:action="@{'/admin/appointments/' + ${a.id} + '/status'}" method="post" class="d-flex gap-1">
+                            <select class="chh-select" name="status" style="padding:5px 28px 5px 9px;font-size:.75rem;width:auto">
+                                <option th:each="s : ${statuses}" th:value="${s.name()}" th:selected="${s == a.status}"
+                                        th:text="${s.label}">Status</option>
+                            </select>
+                            <button class="chh-btn chh-btn--outline chh-btn--sm" type="submit" style="padding:5px 11px">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${appointments.content.isEmpty()}">
+                    <td colspan="10" class="chh-muted text-center py-4">No bookings match this filter.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="d-flex justify-content-center mt-3" th:if="${appointments.totalPages > 1}">
+        <div class="chh-tabbar">
+            <a th:if="${!appointments.first}" th:href="@{/admin/appointments(status=${status},date=${date},page=${appointments.number - 1})}">Previous</a>
+            <button type="button" disabled th:text="'Page ' + (${appointments.number} + 1) + ' / ' + ${appointments.totalPages}">Page</button>
+            <a th:if="${!appointments.last}" th:href="@{/admin/appointments(status=${status},date=${date},page=${appointments.number + 1})}">Next</a>
+        </div>
+    </nav>
+</main>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head>
+    <title layout:fragment="title" th:text="${pageTitle}">Blog</title>
+    <th:block layout:fragment="head-extra">
+        <style>
+            .chh-article { max-width: 760px; }
+            .chh-article p { font-size: 1.02rem; line-height: 1.82; margin-bottom: 1.15rem; }
+            .chh-article h3 { font-size: 1.2rem; margin: 2rem 0 .7rem; }
+            .chh-article ul, .chh-article ol { padding-left: 1.3rem; line-height: 1.85; }
+        </style>
+    </th:block>
+</head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-pagehead">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/blogs}" th:text="#{nav.blogs}">Health blogs</a><span>/</span>
+                <span th:text="${blog.category}">Category</span>
+            </nav>
+            <div class="chh-article">
+                <span class="chh-chip mb-3" th:text="${blog.category}">Category</span>
+                <h1 th:text="${isMarathi} and ${blog.titleMr != null} ? ${blog.titleMr} : ${blog.title}">Title</h1>
+                <div class="chh-blogcard__meta mt-3">
+                    <span class="chh-strong" th:text="${blog.author}">Author</span><span>·</span>
+                    <span th:if="${blog.publishedAt != null}" th:text="${#temporals.format(blog.publishedAt,'d MMMM yyyy')}">Date</span>
+                    <span th:if="${blog.readMinutes != null}" th:text="'· ' + ${blog.readMinutes} + ' min read'">Read</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-5">
+                <div class="col-lg-8">
+                    <article class="chh-article">
+                        <p class="chh-lead" th:text="${blog.excerpt}">Excerpt</p>
+                        <div th:utext="${blog.content}">Body</div>
+
+                        <div class="chh-alert chh-alert--warn mt-4">
+                            <svg><use href="/img/icons/sprite.svg#alert"></use></svg>
+                            <span>This article is general health information, not a substitute for medical advice.
+                                For your specific situation, book a consultation with one of our physicians.</span>
+                        </div>
+
+                        <div class="chh-row mt-4" th:if="${blog.tags != null}">
+                            <span class="chh-chip chh-chip--outline"
+                                  th:each="tag : ${#strings.arraySplit(blog.tags,',')}" th:text="${#strings.trim(tag)}">Tag</span>
+                        </div>
+
+                        <hr class="chh-rule my-4">
+                        <div class="chh-row chh-row--between">
+                            <a class="chh-link-arrow" th:href="@{/blogs}">
+                                <svg width="15" height="15" style="transform:rotate(180deg)"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                                <span>All articles</span>
+                            </a>
+                            <a class="chh-btn chh-btn--primary chh-btn--sm" th:href="@{/book}" th:text="#{nav.book}">Book</a>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="col-lg-4">
+                    <div class="chh-card mb-3">
+                        <div class="chh-card__body" style="background:linear-gradient(140deg,var(--chh-primary-mist),#fff)">
+                            <h3 class="chh-h4">Talk to a doctor</h3>
+                            <p class="chh-small chh-muted">Book an OPD or video consultation in two minutes.</p>
+                            <a class="chh-btn chh-btn--primary chh-btn--block" th:href="@{/book}" th:text="#{nav.book}">Book appointment</a>
+                        </div>
+                    </div>
+                    <div th:if="${related != null and !related.isEmpty()}">
+                        <h3 class="chh-h4 mb-2">More articles</h3>
+                        <div class="chh-stack">
+                            <a class="chh-announce" th:each="r : ${related}" th:href="@{'/blogs/' + ${r.slug}}">
+                                <span class="chh-announce__thumb"><svg><use href="/img/icons/sprite.svg#clipboard"></use></svg></span>
+                                <span>
+                                    <span class="chh-announce__title d-block" th:text="${#strings.abbreviate(r.title,72)}">Title</span>
+                                    <span class="chh-announce__date d-block" th:text="${r.category}">Category</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

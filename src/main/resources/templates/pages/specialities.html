@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Specialities</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Clinical departments','Specialities & centres of care','विभाग व विशेष केंद्रे',
+        'Eighteen departments at the Katol campus, supported by visiting consultants from Nagpur.',
+        'कटोल येथे अठरा विभाग; नागपूर येथील भेट देणारे तज्ज्ञ यांचा पाठिंबा.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-catgrid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
+                <a class="chh-card chh-fade" th:each="s : ${specialities}" th:href="@{'/specialities/' + ${s.slug}}"
+                   th:style="'--chh-cat-accent:' + ${s.accentColor}">
+                    <div class="chh-card__body">
+                        <span class="chh-icon chh-icon--lg"
+                              th:style="'background:' + ${s.accentColor} + '18;color:' + ${s.accentColor}">
+                            <svg><use th:href="@{'/img/icons/sprite.svg#' + ${s.iconKey}}"></use></svg>
+                        </span>
+                        <h3 class="chh-h4" th:text="${isMarathi} and ${s.nameMr != null} ? ${s.nameMr} : ${s.name}">Speciality</h3>
+                        <p class="chh-small chh-muted mb-0" th:text="${s.summary}">Summary</p>
+                        <span class="chh-link-arrow mt-auto">
+                            <span th:text="#{common.learnmore}">Learn more</span>
+                            <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

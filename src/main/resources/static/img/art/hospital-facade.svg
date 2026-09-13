@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/><stop offset="1" stop-color="#ffffff" stop-opacity=".05"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#E8A33D" stop-opacity=".9"/><stop offset="1" stop-color="#F6CE8B" stop-opacity=".6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="470" cy="96" r="66" fill="url(#g2)" opacity=".5"/>
+  <circle cx="470" cy="96" r="92" stroke="#E8A33D" stroke-opacity=".3" stroke-width="1.5"/>
+  <!-- ground -->
+  <path d="M0 372h600" stroke="#ffffff" stroke-opacity=".28" stroke-width="2"/>
+  <!-- left wing -->
+  <rect x="52" y="212" width="128" height="160" rx="10" fill="url(#g1)" stroke="#ffffff" stroke-opacity=".38" stroke-width="2"/>
+  <!-- main tower -->
+  <rect x="188" y="118" width="196" height="254" rx="14" fill="url(#g1)" stroke="#ffffff" stroke-opacity=".5" stroke-width="2.4"/>
+  <!-- right wing -->
+  <rect x="392" y="246" width="128" height="126" rx="10" fill="url(#g1)" stroke="#ffffff" stroke-opacity=".38" stroke-width="2"/>
+  <!-- cross emblem -->
+  <circle cx="286" cy="168" r="30" fill="#ffffff" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M286 152v32M270 168h32" stroke="#E8A33D" stroke-width="7" stroke-linecap="round"/>
+  <!-- windows main -->
+  <g fill="#ffffff" fill-opacity=".3">
+    <rect x="212" y="216" width="26" height="20" rx="4"/><rect x="252" y="216" width="26" height="20" rx="4"/>
+    <rect x="292" y="216" width="26" height="20" rx="4"/><rect x="332" y="216" width="26" height="20" rx="4"/>
+    <rect x="212" y="250" width="26" height="20" rx="4"/><rect x="252" y="250" width="26" height="20" rx="4"/>
+    <rect x="292" y="250" width="26" height="20" rx="4"/><rect x="332" y="250" width="26" height="20" rx="4"/>
+    <rect x="212" y="284" width="26" height="20" rx="4"/><rect x="332" y="284" width="26" height="20" rx="4"/>
+  </g>
+  <g fill="#E8A33D" fill-opacity=".55">
+    <rect x="252" y="284" width="26" height="20" rx="4"/><rect x="292" y="284" width="26" height="20" rx="4"/>
+  </g>
+  <!-- windows wings -->
+  <g fill="#ffffff" fill-opacity=".24">
+    <rect x="72" y="236" width="22" height="18" rx="4"/><rect x="106" y="236" width="22" height="18" rx="4"/><rect x="140" y="236" width="22" height="18" rx="4"/>
+    <rect x="72" y="270" width="22" height="18" rx="4"/><rect x="106" y="270" width="22" height="18" rx="4"/><rect x="140" y="270" width="22" height="18" rx="4"/>
+    <rect x="412" y="270" width="22" height="18" rx="4"/><rect x="446" y="270" width="22" height="18" rx="4"/><rect x="480" y="270" width="22" height="18" rx="4"/>
+    <rect x="412" y="304" width="22" height="18" rx="4"/><rect x="446" y="304" width="22" height="18" rx="4"/><rect x="480" y="304" width="22" height="18" rx="4"/>
+  </g>
+  <!-- entrance -->
+  <path d="M252 372v-46a34 34 0 0 1 68 0v46Z" fill="#ffffff" fill-opacity=".18" stroke="#ffffff" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M286 326v46" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.6"/>
+  <!-- ambulance -->
+  <g transform="translate(404 320)">
+    <rect x="0" y="12" width="60" height="26" rx="6" fill="#ffffff" fill-opacity=".26" stroke="#ffffff" stroke-opacity=".55" stroke-width="2"/>
+    <path d="M60 20h16l10 10v8H60Z" fill="#ffffff" fill-opacity=".2" stroke="#ffffff" stroke-opacity=".5" stroke-width="2"/>
+    <circle cx="16" cy="42" r="7" fill="#06211D" stroke="#ffffff" stroke-opacity=".6" stroke-width="2"/>
+    <circle cx="66" cy="42" r="7" fill="#06211D" stroke="#ffffff" stroke-opacity=".6" stroke-width="2"/>
+    <path d="M24 20h8M28 16v8" stroke="#E8A33D" stroke-width="3.4" stroke-linecap="round"/>
+  </g>
+  <!-- trees -->
+  <g stroke="#ffffff" stroke-opacity=".42" stroke-width="2" fill="#ffffff" fill-opacity=".12">
+    <circle cx="34" cy="342" r="20"/><path d="M34 362v14"/>
+    <circle cx="556" cy="352" r="15"/><path d="M556 366v10"/>
+  </g>
+</svg>

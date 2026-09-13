@@ -1,0 +1,13 @@
+{
+  "name": "Chinche Hospital | चींचे हॉस्पिटल, कटोल",
+  "short_name": "Chinche Hospital",
+  "description": "Multi-speciality hospital in Katol, Nagpur. Book appointments, health check-ups and lab tests online.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0E7C66",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

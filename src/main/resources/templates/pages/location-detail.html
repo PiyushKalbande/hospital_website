@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Centre</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-pagehead">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/locations}" th:text="#{nav.locations}">Centres</a><span>/</span>
+                <span th:text="${facility.name}">Name</span>
+            </nav>
+            <h1 th:text="${isMarathi} and ${facility.nameMr != null} ? ${facility.nameMr} : ${facility.name}">Facility</h1>
+            <p class="chh-lead mt-2 mb-0" th:text="${facility.addressLine}">Address</p>
+            <div class="chh-row mt-3">
+                <a class="chh-btn chh-btn--primary" th:href="@{/book(facilityId=${facility.id})}" th:text="#{nav.book}">Book</a>
+                <a class="chh-btn chh-btn--outline" th:href="'tel:' + ${#strings.replace(facility.phone,' ','')}">
+                    <svg width="16" height="16"><use href="/img/icons/sprite.svg#phone"></use></svg>
+                    <span th:text="${facility.phone}">Phone</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <dl class="chh-profile-meta" style="grid-template-columns:1fr">
+                        <div><dt>Type</dt><dd th:text="${facility.facilityType != null} ? ${facility.facilityType.label} : '—'">Type</dd></div>
+                        <div><dt th:text="#{common.page}">Hours</dt><dd th:text="${facility.hoursText}">Hours</dd></div>
+                        <div th:if="${facility.bedCount != null and facility.bedCount > 0}">
+                            <dt th:text="#{section.stats.beds}">Beds</dt><dd th:text="${facility.bedCount}">0</dd></div>
+                        <div><dt th:text="#{topbar.helpline}">Phone</dt><dd th:text="${facility.phone}">—</dd></div>
+                        <div th:if="${facility.emergencyPhone != null}">
+                            <dt th:text="#{topbar.emergency}">Emergency</dt><dd th:text="${facility.emergencyPhone}">—</dd></div>
+                        <div th:if="${facility.rating != null}">
+                            <dt>Rating</dt>
+                            <dd><span class="chh-rating"><svg><use href="/img/icons/sprite.svg#star"></use></svg>
+                                <span th:text="${#numbers.formatDecimal(facility.rating,1,1)}">4.7</span></span>
+                                <span class="chh-tiny chh-faint" th:text="'(' + ${facility.reviewCount} + ' reviews)'"></span></dd>
+                        </div>
+                    </dl>
+                    <h3 class="chh-h4 mt-4 mb-2">Amenities</h3>
+                    <div class="chh-facility-card__amenities" th:if="${facility.amenities != null}">
+                        <span class="chh-amenity" th:each="a : ${#strings.arraySplit(facility.amenities,',')}"
+                              th:text="${#strings.capitalize(a)}">Amenity</span>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="chh-card" style="overflow:hidden">
+                        <iframe title="Map" style="width:100%;height:420px;border:0" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                th:src="'https://www.google.com/maps?q=' + ${facility.latitude} + ',' + ${facility.longitude} + '&amp;z=14&amp;output=embed'"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

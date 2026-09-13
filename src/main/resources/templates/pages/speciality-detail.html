@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Speciality</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-profile-hero">
+        <div class="chh-container">
+            <nav class="chh-breadcrumb mb-3">
+                <a th:href="@{/}" th:text="#{nav.home}">Home</a><span>/</span>
+                <a th:href="@{/specialities}" th:text="#{nav.specialities}">Specialities</a><span>/</span>
+                <span th:text="${speciality.name}">Name</span>
+            </nav>
+            <div class="chh-row" style="align-items:flex-start;gap:22px">
+                <span class="chh-icon chh-icon--lg" style="width:76px;height:76px;flex-basis:76px;border-radius:22px"
+                      th:style="'width:76px;height:76px;flex:0 0 76px;border-radius:22px;background:' + ${speciality.accentColor} + '18;color:' + ${speciality.accentColor}">
+                    <svg style="width:38px;height:38px"><use th:href="@{'/img/icons/sprite.svg#' + ${speciality.iconKey}}"></use></svg>
+                </span>
+                <div style="flex:1 1 420px;min-width:0">
+                    <h1 th:text="${isMarathi} and ${speciality.nameMr != null} ? ${speciality.nameMr} : ${speciality.name}">Speciality</h1>
+                    <p class="chh-lead mt-2 mb-0" th:text="${speciality.summary}">Summary</p>
+                    <div class="chh-row mt-3">
+                        <a class="chh-btn chh-btn--primary" th:href="@{/book(specialityId=${speciality.id})}">
+                            <span th:text="#{nav.book}">Book appointment</span>
+                        </a>
+                        <a class="chh-btn chh-btn--outline" th:href="@{/doctors(specialityId=${speciality.id})}">
+                            <span th:text="#{nav.doctors}">Find a doctor</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div th:if="${procedures != null and !procedures.isEmpty()}" class="mb-5">
+                <div class="chh-section-head">
+                    <div class="chh-section-head__title">
+                        <span class="chh-eyebrow">What we do</span>
+                        <h2 th:text="#{nav.procedures}">Treatments &amp; procedures</h2>
+                    </div>
+                </div>
+                <div class="chh-grid-3">
+                    <a class="chh-card chh-fade" th:each="p : ${procedures}" th:href="@{'/procedures/' + ${p.slug}}">
+                        <div class="chh-card__body">
+                            <span class="chh-icon"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${p.iconKey}}"></use></svg></span>
+                            <h3 class="chh-h4" th:text="${isMarathi} and ${p.nameMr != null} ? ${p.nameMr} : ${p.name}">Procedure</h3>
+                            <p class="chh-small chh-muted mb-0" th:text="${#strings.abbreviate(p.summary,130)}">Summary</p>
+                            <div class="chh-row mt-auto">
+                                <span class="chh-chip chh-chip--accent" th:if="${p.indicativeCost != null}"
+                                      th:text="#{common.from} + ' ₹' + ${#numbers.formatInteger(p.indicativeCost,0,'COMMA')}">From</span>
+                                <span class="chh-chip chh-chip--outline" th:if="${p.typicalStayDays != null and p.typicalStayDays > 0}"
+                                      th:text="${p.typicalStayDays} + ' day stay'">Stay</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="chh-section-head">
+                <div class="chh-section-head__title">
+                    <span class="chh-eyebrow">Our team</span>
+                    <h2>Consultants in this department</h2>
+                </div>
+            </div>
+            <div class="chh-grid-3" th:if="${doctors != null and !doctors.isEmpty()}">
+                <th:block th:each="d : ${doctors}">
+                    <div th:replace="~{fragments/page-head :: doctorCard(${d})}"></div>
+                </th:block>
+            </div>
+            <div class="chh-empty-page" th:unless="${doctors != null and !doctors.isEmpty()}">
+                <p class="chh-lead">Consultants for this department visit on specific days. Call
+                    <a th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}" th:text="${contact.phone}">the helpline</a>
+                    for the current schedule.</p>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

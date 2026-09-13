@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${lang} ?: 'en'">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Staff sign in | Chinche Hospital</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body style="background:linear-gradient(150deg,var(--chh-primary-deeper),var(--chh-ink));min-height:100vh;display:grid;place-items:center;padding:24px">
+
+<div style="width:100%;max-width:420px">
+    <div class="text-center mb-4">
+        <a class="chh-brand justify-content-center" th:href="@{/}" style="display:inline-flex">
+            <span class="chh-brand__mark" style="background:rgba(255,255,255,.14);box-shadow:none">
+                <svg><use href="/img/icons/sprite.svg#heart"></use></svg>
+            </span>
+        </a>
+        <h1 class="chh-h3 mt-3" style="color:#fff">Staff sign in</h1>
+        <p class="chh-small" style="color:#9FC0B8">Chinche Hospital · चींचे हॉस्पिटल, कटोल</p>
+    </div>
+
+    <div class="chh-card">
+        <div class="chh-card__body">
+            <div class="chh-alert chh-alert--err mb-3" th:if="${param.error}">
+                <svg><use href="/img/icons/sprite.svg#alert"></use></svg>
+                <span>Incorrect username or password.</span>
+            </div>
+            <div class="chh-alert chh-alert--ok mb-3" th:if="${param.logout}">
+                <svg><use href="/img/icons/sprite.svg#check-circle"></use></svg>
+                <span>You have been signed out.</span>
+            </div>
+
+            <form th:action="@{/admin/login}" method="post">
+                <div class="chh-field">
+                    <label class="chh-label" for="username">Username</label>
+                    <input class="chh-input" id="username" name="username" required autofocus autocomplete="username">
+                </div>
+                <div class="chh-field">
+                    <label class="chh-label" for="password">Password</label>
+                    <input class="chh-input" id="password" name="password" type="password" required autocomplete="current-password">
+                </div>
+                <button class="chh-btn chh-btn--primary chh-btn--block chh-btn--lg" type="submit">Sign in</button>
+            </form>
+        </div>
+        <div class="chh-card__foot chh-tiny chh-faint text-center">
+            Restricted area. All access is logged.
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a class="chh-tiny" style="color:#9FC0B8" th:href="@{/}">← Back to website</a>
+    </div>
+</div>
+</body>
+</html>

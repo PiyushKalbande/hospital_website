@@ -1,0 +1,78 @@
+# ---------------------------------------------------------------------------
+#  Local infrastructure for Chinche Hospital.
+#
+#    docker compose up -d          # MySQL 8 + Adminer + Mailpit
+#    ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
+#
+#  Volumes persist, so demo data survives restarts.
+# ---------------------------------------------------------------------------
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: chinche-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+05:30
+      - --max_connections=500
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-chinche_hospital}
+      MYSQL_USER: ${DB_USER:-chinche}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-chinche}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - chinche-mysql-data:/var/lib/mysql
+      - ./docs/sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:4
+    container_name: chinche-adminer
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "8081:8080"
+
+  # Local SMTP sink — booking confirmation emails land here during development.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: chinche-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8080"   # Web UI
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chinche-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-chinche_hospital}
+      DB_USER: ${DB_USER:-chinche}
+      DB_PASSWORD: ${DB_PASSWORD:-chinche}
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@chinchehospital.in}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Chinche@2026}
+    ports:
+      - "8080:8080"
+    profiles: ["full"]
+
+volumes:
+  chinche-mysql-data:

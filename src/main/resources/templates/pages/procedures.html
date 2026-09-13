@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Treatments</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Treatments','Treatments & procedures','उपचार व शस्त्रक्रिया',
+        'Indicative costs are for planning only. Your final estimate is confirmed after the pre-operative assessment.',
+        'अंदाजे खर्च केवळ नियोजनासाठी आहे; अंतिम अंदाज तपासणीनंतर निश्चित होतो.')}"></div>
+
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="chh-grid-3">
+                <a class="chh-card chh-fade" th:each="p : ${procedures}" th:href="@{'/procedures/' + ${p.slug}}">
+                    <div class="chh-card__body">
+                        <div class="chh-row chh-row--between">
+                            <span class="chh-icon chh-icon--indigo"><svg><use th:href="@{'/img/icons/sprite.svg#' + ${p.iconKey}}"></use></svg></span>
+                            <span class="chh-chip chh-chip--outline" th:if="${p.speciality != null}" th:text="${p.speciality.name}">Speciality</span>
+                        </div>
+                        <h3 class="chh-h4" th:text="${isMarathi} and ${p.nameMr != null} ? ${p.nameMr} : ${p.name}">Procedure</h3>
+                        <p class="chh-small chh-muted mb-0" th:text="${p.summary}">Summary</p>
+                        <div class="chh-row mt-auto">
+                            <span class="chh-chip chh-chip--accent" th:if="${p.indicativeCost != null}"
+                                  th:text="#{common.from} + ' ₹' + ${#numbers.formatInteger(p.indicativeCost,0,'COMMA')}">From</span>
+                            <span class="chh-tiny chh-faint" th:if="${p.typicalStayDays != null and p.typicalStayDays > 0}"
+                                  th:text="${p.typicalStayDays} + '-day stay'">Stay</span>
+                            <span class="chh-tiny chh-faint" th:if="${p.typicalStayDays != null and p.typicalStayDays == 0}">Day procedure</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

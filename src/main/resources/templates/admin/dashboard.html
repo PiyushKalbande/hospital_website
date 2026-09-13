@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Dashboard | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div>
+            <h1 class="chh-h2">Dashboard</h1>
+            <p class="chh-small chh-muted mb-0">Live view of bookings, occupancy and enquiries.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="chh-btn chh-btn--outline chh-btn--sm" th:href="@{/admin/appointments}">All appointments</a>
+            <a class="chh-btn chh-btn--primary chh-btn--sm" th:href="@{/}">View site</a>
+        </div>
+    </div>
+
+    <div class="chh-kpis">
+        <div class="chh-kpi"><div class="chh-kpi__label">Today</div>
+            <div class="chh-kpi__value" th:text="${stats.appointmentsToday}">0</div>
+            <div class="chh-kpi__delta" th:text="'Tomorrow: ' + ${stats.appointmentsTomorrow}">—</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Pending</div>
+            <div class="chh-kpi__value" th:text="${stats.pending}">0</div>
+            <div class="chh-kpi__delta">Needs confirmation</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Confirmed</div>
+            <div class="chh-kpi__value" th:text="${stats.confirmed}">0</div>
+            <div class="chh-kpi__delta" th:text="'Completed: ' + ${stats.completed}">—</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Last 24 h</div>
+            <div class="chh-kpi__value" th:text="${stats.last24h}">0</div>
+            <div class="chh-kpi__delta">New bookings</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Open enquiries</div>
+            <div class="chh-kpi__value" th:text="${stats.openEnquiries}">0</div>
+            <div class="chh-kpi__delta">Contact form</div></div>
+        <div class="chh-kpi"><div class="chh-kpi__label">Panel</div>
+            <div class="chh-kpi__value" th:text="${stats.doctors}">0</div>
+            <div class="chh-kpi__delta" th:text="${stats.specialities} + ' specialities'">—</div></div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="chh-card"><div class="chh-card__body">
+                <div class="chh-row chh-row--between mb-3">
+                    <h2 class="chh-h4 mb-0">Bookings — last 14 days</h2>
+                    <span class="chh-tiny chh-faint">Total <b th:text="${stats.totalAppointments}">0</b></span>
+                </div>
+                <div class="chh-bars" th:with="peak=${#aggregates.sum(trend.![count])}">
+                    <div class="chh-bars__col" th:each="point : ${trend}">
+                        <div class="chh-bars__bar"
+                             th:style="'height:' + ${point.count > 0 ? (point.count * 14 + 6) : 4} + 'px'"
+                             th:title="${point.date} + ' — ' + ${point.count} + ' bookings'"></div>
+                        <span class="chh-bars__label" th:text="${#strings.substring(point.date,8,10)}">01</span>
+                    </div>
+                </div>
+                </div>
+            </div></div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="chh-card"><div class="chh-card__body">
+                <h2 class="chh-h4 mb-3">By department</h2>
+                <div class="chh-stack" th:if="${!bySpeciality.isEmpty()}">
+                    <div th:each="row : ${bySpeciality}">
+                        <div class="chh-row chh-row--between chh-small">
+                            <span th:text="${row.speciality}">Speciality</span>
+                            <b class="chh-num" th:text="${row.count}">0</b>
+                        </div>
+                        <div style="height:6px;background:var(--chh-surface-2);border-radius:3px;margin-top:5px">
+                            <div th:style="'height:6px;border-radius:3px;background:var(--chh-primary);width:' +
+                                          ${row.count * 12 > 100 ? 100 : row.count * 12} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="chh-small chh-muted" th:if="${bySpeciality.isEmpty()}">No bookings yet.</p>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="chh-card mt-3">
+        <div class="chh-card__body">
+            <div class="chh-row chh-row--between mb-3">
+                <h2 class="chh-h4 mb-0">Today's schedule</h2>
+                <a class="chh-link-arrow" th:href="@{/admin/appointments}">All appointments
+                    <svg width="14" height="14"><use href="/img/icons/sprite.svg#arrow-right"></use></svg></a>
+            </div>
+            <div class="table-responsive">
+                <table class="chh-table">
+                    <thead><tr><th>Ref</th><th>Time</th><th>Patient</th><th>Doctor</th><th>Type</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <tr th:each="a : ${todayBookings}">
+                        <td class="chh-mono chh-tiny" th:text="${a.referenceNo}">CHH-…</td>
+                        <td class="chh-num chh-small" th:text="${#temporals.format(a.slotStart,'h:mm a')}">9:00</td>
+                        <td class="chh-strong" th:text="${a.patient.fullName}">Patient</td>
+                        <td class="chh-small" th:text="${a.doctor != null} ? ${a.doctor.name} : '—'">Doctor</td>
+                        <td><span class="chh-chip chh-chip--outline" th:text="${a.serviceType.label}">Type</span></td>
+                        <td><span class="chh-status"
+                                  th:classappend="'chh-status--' + ${#strings.toLowerCase(a.status.name())}"
+                                  th:text="${a.status.label}">Status</span></td>
+                    </tr>
+                    <tr th:if="${todayBookings.isEmpty()}">
+                        <td colspan="6" class="chh-muted text-center py-4">No appointments booked for today yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,129 @@
+# ---------------------------------------------------------------------------
+#  चींचे हॉस्पिटल | Chinche Hospital, Katol (Maharashtra)
+#  Platform configuration — profile-agnostic core settings.
+#
+#  Profiles
+#    dev    -> H2 in-memory (MySQL compatibility mode). Zero-install. DEFAULT.
+#    mysql  -> MySQL 8 (production / staging). Credentials via env vars.
+# ---------------------------------------------------------------------------
+spring:
+  application:
+    name: chinche-hospital
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # ---------- Thymeleaf ----------
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+
+  # ---------- JPA (dialect/datasource come from the active profile) ----------
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 30
+          time_zone: Asia/Kolkata
+        order_inserts: true
+        order_updates: true
+        query:
+          in_clause_parameter_padding: true
+
+  # ---------- HTTP ----------
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 12MB
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 604800
+          cache-public: true
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+
+  # ---------- Mail (booking confirmations). No-op logger transport by default. ----------
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  address: 0.0.0.0
+  compression:
+    enabled: true
+    mime-types: text/html,text/css,application/javascript,application/json,image/svg+xml
+    min-response-size: 2048
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+  forward-headers-strategy: framework
+  error:
+    whitelabel:
+      enabled: false
+
+# ---------- Caching (lookups are read-heavy, write-light) ----------
+chinche:
+  cache:
+    enabled: true
+  seeding:
+    # Loads demo catalogue (specialities, doctors, packages, content) on an empty DB
+    enabled: ${SEED_DEMO_DATA:true}
+  booking:
+    slot-minutes: 20
+    advance-days: 45
+    max-per-slot: 1
+    reference-prefix: CHH
+  contact:
+    address-line-1: "चींचे हॉस्पिटल, बस स्थानक चौक"
+    address-line-2: "मुळाई रोड, कटोल, जि. नागपूर"
+    pincode: "441302"
+    state: "महाराष्ट्र"
+    phone: "+91 712 240 1100"
+    emergency: "108 / +91 94221 00108"
+    email: "care@chinchehospital.in"
+    map-embed: "https://www.google.com/maps?q=Katol,+Nagpur,+Maharashtra+441302&output=embed"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /api-docs
+    operationsSorter: method
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    in.chinche.hospital: DEBUG
+    org.hibernate.SQL: WARN

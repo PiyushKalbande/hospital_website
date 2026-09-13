@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}" th:lang="${lang}">
+<head><title layout:fragment="title" th:text="${pageTitle}">Insurance</title></head>
+<body>
+<main layout:fragment="content">
+    <div th:replace="~{fragments/page-head :: head('Billing','Cashless insurance & TPA','कॅशलेस विमा व टी.पी.ए.',
+        'We are empanelled with the state scheme and most major insurers. The TPA helpdesk sits at the main reception.',
+        'राज्य योजना व बहुतांश विमा कंपन्यांशी संलग्न.')}"></div>
+    <section class="chh-section">
+        <div class="chh-container">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <h2 class="chh-h3 mb-3">Schemes and insurers we work with</h2>
+                    <div class="chh-grid-2">
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#government"></use></svg>
+                            <span>Mahatma Jyotiba Phule Jan Arogya Yojana (cashless)</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#government"></use></svg>
+                            <span>Ayushman Bharat — PMJAY (empanelled procedures)</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#insurance"></use></svg>
+                            <span>Major private TPAs and health insurers</span></div>
+                        <div class="chh-alert chh-alert--ok"><svg><use href="/img/icons/sprite.svg#insurance"></use></svg>
+                            <span>Employees' State Insurance (ESI) panel</span></div>
+                    </div>
+                    <h3 class="chh-h4 mt-4 mb-2">How cashless admission works</h3>
+                    <ol class="chh-small chh-muted" style="line-height:2">
+                        <li>Bring your policy card or Jan Arogya card and a photo ID at admission.</li>
+                        <li>Our TPA desk files the pre-authorisation request the same day.</li>
+                        <li>Insurer approval usually arrives within 6–24 hours; emergency care is never delayed for it.</li>
+                        <li>At discharge you pay only the non-payable components, itemised in writing.</li>
+                    </ol>
+                </div>
+                <div class="col-lg-5">
+                    <div class="chh-card"><div class="chh-card__body">
+                        <h3 class="chh-h4">TPA helpdesk</h3>
+                        <p class="chh-small chh-muted">Main reception, ground floor. Open 8:00 AM – 8:00 PM, all days.</p>
+                        <p class="chh-strong mb-1" th:text="${contact.phone}">Phone</p>
+                        <a class="chh-btn chh-btn--primary chh-btn--block mt-2" th:href="@{/contact}" th:text="#{nav.contact}">Contact</a>
+                    </div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
