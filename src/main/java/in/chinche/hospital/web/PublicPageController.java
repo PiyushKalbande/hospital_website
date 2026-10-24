@@ -303,7 +303,7 @@ public class PublicPageController {
     public String emergency(Model model) {
         model.addAttribute("pageTitle", "24×7 Emergency & Ambulance | Chinche Hospital Katol");
         model.addAttribute("metaDescription", "Round-the-clock trauma, cardiac and stroke emergency at Chinche Hospital, Katol. "
-                + "Call 108 or +91 94221 00108.");
+                + "Call 108 or +91 70836 82563.");
         return "pages/emergency";
     }
 

@@ -68,8 +68,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-chinche}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@chinchehospital.in}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-dadakalbande111@gmail.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Chinche@2026}
+      RECEPTION_PASSWORD: ${RECEPTION_PASSWORD:-Reception@2026}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
     ports:
       - "8080:8080"
     profiles: ["full"]

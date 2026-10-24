@@ -3,14 +3,14 @@
 #  Platform configuration — profile-agnostic core settings.
 #
 #  Profiles
-#    dev    -> H2 in-memory (MySQL compatibility mode). Zero-install. DEFAULT.
+#    dev    -> H2 in-memory (MySQL compatibility mode). Zero-install.
 #    mysql  -> MySQL 8 (production / staging). Credentials via env vars.
 # ---------------------------------------------------------------------------
 spring:
   application:
     name: chinche-hospital
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:mysql}
 
   # ---------- Thymeleaf ----------
   thymeleaf:
@@ -87,7 +87,7 @@ chinche:
     enabled: true
   seeding:
     # Loads demo catalogue (specialities, doctors, packages, content) on an empty DB
-    enabled: ${SEED_DEMO_DATA:true}
+    enabled: ${SEED_DEMO_DATA:false}
   booking:
     slot-minutes: 20
     advance-days: 45
@@ -98,9 +98,9 @@ chinche:
     address-line-2: "मुळाई रोड, कटोल, जि. नागपूर"
     pincode: "441302"
     state: "महाराष्ट्र"
-    phone: "+91 712 240 1100"
-    emergency: "108 / +91 94221 00108"
-    email: "care@chinchehospital.in"
+    phone: "+91 70836 82563"
+    emergency: "108 / +91 70836 82563"
+    email: "dadakalbande111@gmail.com"
     map-embed: "https://www.google.com/maps?q=Katol,+Nagpur,+Maharashtra+441302&output=embed"
 
 management:

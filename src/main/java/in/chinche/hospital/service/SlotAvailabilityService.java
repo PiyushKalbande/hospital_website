@@ -2,6 +2,8 @@ package in.chinche.hospital.service;
 
 import in.chinche.hospital.config.AppProperties;
 import in.chinche.hospital.domain.Doctor;
+import in.chinche.hospital.domain.DoctorAttendance;
+import in.chinche.hospital.domain.DoctorAttendanceBreak;
 import in.chinche.hospital.domain.DoctorLeave;
 import in.chinche.hospital.domain.DoctorSchedule;
 import in.chinche.hospital.domain.enums.AppointmentStatus;
@@ -10,6 +12,7 @@ import in.chinche.hospital.dto.response.DayAvailabilityDto;
 import in.chinche.hospital.dto.response.SlotDto;
 import in.chinche.hospital.exception.ResourceNotFoundException;
 import in.chinche.hospital.repository.AppointmentRepository;
+import in.chinche.hospital.repository.DoctorAttendanceRepository;
 import in.chinche.hospital.repository.DoctorLeaveRepository;
 import in.chinche.hospital.repository.DoctorRepository;
 import in.chinche.hospital.repository.DoctorScheduleRepository;
@@ -51,6 +54,7 @@ public class SlotAvailabilityService {
     private final DoctorRepository doctors;
     private final DoctorScheduleRepository schedules;
     private final DoctorLeaveRepository leaves;
+    private final DoctorAttendanceRepository attendance;
     private final AppointmentRepository appointments;
     private final AppProperties props;
 
@@ -121,6 +125,11 @@ public class SlotAvailabilityService {
         }
 
         Set<LocalTime> booked = new HashSet<>(appointments.findBookedSlotStarts(doctor.getId(), date, mode, BLOCKING));
+        List<DoctorAttendanceBreak> awayIntervals = attendance.findByDoctorIdAndAttendanceDate(doctor.getId(), date)
+                .map(DoctorAttendance::getBreaks).orElse(List.of()).stream()
+                .filter(Objects::nonNull)
+                .filter(b -> b.getStartTime() != null && b.getEndTime() != null)
+                .toList();
         LocalDateTime now = LocalDateTime.now(ZONE);
         List<SlotDto> slots = new ArrayList<>();
 
@@ -135,19 +144,36 @@ public class SlotAvailabilityService {
             LocalTime cursor = row.getStartTime();
             while (cursor.plusMinutes(step).compareTo(row.getEndTime()) <= 0) {
                 LocalTime end = cursor.plusMinutes(step);
-                boolean available = !booked.contains(cursor);
+
+                // FIX: Stream ke liye ek 'effectively final' variable banayein
+                final LocalTime currentSlotStart = cursor;
+
+                boolean available = !booked.contains(currentSlotStart)
+                    && awayIntervals.stream().noneMatch(b -> overlaps(currentSlotStart, end, b)); // Yahan naya variable use kiya
+
                 if (available && date.isEqual(today()) && LocalDateTime.of(date, end).isBefore(now.plusMinutes(30))) {
                     available = false;   // slot ends too soon to be usable
                 }
-                slots.add(new SlotDto(cursor, end, available, SlotDto.periodOf(cursor)));
+                slots.add(new SlotDto(currentSlotStart, end, available, SlotDto.periodOf(currentSlotStart)));
+
+                // Ab aap bina kisi error ke cursor ko aage badha sakte hain
                 cursor = end;
             }
+
         }
 
         slots.sort(Comparator.comparing(SlotDto::start));
         boolean anyOpen = slots.stream().anyMatch(SlotDto::available);
-        String reason = anyOpen ? null : "All slots fully booked for this date";
+        String reason = anyOpen
+                ? (awayIntervals.isEmpty() ? null : "Some slots are unavailable during the doctor's break.")
+                : (awayIntervals.isEmpty() ? "All slots fully booked for this date"
+                : "Doctor is unavailable during the recorded break or fully booked.");
         return new DayAvailabilityDto(date, dayName, anyOpen, reason, slots);
+    }
+
+    private boolean overlaps(LocalTime slotStart, LocalTime slotEnd, DoctorAttendanceBreak interval) {
+        return interval != null && interval.getStartTime() != null && interval.getEndTime() != null
+                && interval.getStartTime().isBefore(slotEnd) && interval.getEndTime().isAfter(slotStart);
     }
 
     private LocalDate clamp(LocalDate date) {

@@ -31,6 +31,10 @@ announcements, patient stories, testimonials and awards.
 
 ### Option B — MySQL 8 (production-shaped)
 
+For Docker Compose, copy `.env.example` to `.env` and replace the example
+passwords before starting the stack. `.env` is excluded from Git and the Docker
+build context.
+
 ```bash
 docker compose up -d mysql adminer mailpit     # MySQL :3306, Adminer :8081, Mailpit :8025
 mvn spring-boot:run -Dspring-boot.run.profiles=mysql
@@ -265,7 +269,7 @@ Everything is environment-variable driven with sane defaults — see
 | `chinche.seeding.enabled` | `true` (dev) | load the demo dataset |
 
 Profiles: `dev` (H2, show-sql, devtools, seeding on), `mysql` (MySQL 8, ddl-auto
-`update`, seeding off unless enabled).
+`update`, seeding off unless `SEED_DEMO_DATA=true` is set).
 
 ---
 

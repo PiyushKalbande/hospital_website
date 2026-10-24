@@ -59,6 +59,9 @@
         <div class="chh-alert chh-alert--ok mb-3" th:if="${success}">
             <svg><use href="/img/icons/sprite.svg#check-circle"></use></svg><span th:text="${success}">Success</span>
         </div>
+        <div class="chh-alert chh-alert--err mb-3" th:if="${error}">
+            <span th:text="${error}">Something went wrong.</span>
+        </div>
         <main layout:fragment="content"></main>
     </div>
 </div>

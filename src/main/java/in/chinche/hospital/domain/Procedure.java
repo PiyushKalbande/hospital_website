@@ -5,7 +5,7 @@ import lombok.*;
 
 /** A named intervention offered within a speciality (e.g. Total Knee Replacement). */
 @Entity
-@Table(name = "procedure", indexes = {
+@Table(name = "hospital_procedure", indexes = {
         @Index(name = "idx_procedure_slug", columnList = "slug", unique = true),
         @Index(name = "idx_procedure_speciality", columnList = "speciality_id")
 })

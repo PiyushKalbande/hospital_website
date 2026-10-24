@@ -25,7 +25,8 @@
 
                     <div class="chh-hero__slide" th:style="'background:' + ${s.gradient}">
                         <img class="chh-hero__art" th:if="${s.artKey != null}"
-                             th:src="@{'/img/art/' + ${s.artKey} + '.svg'}" alt="" aria-hidden="true">
+                                th:src="@{'/img/art/' + ${s.artKey} + '.svg'}"
+                                onerror="this.onerror=null;this.src='/img/art/placeholder.svg'" alt="" aria-hidden="true">
 
                         <div class="chh-container">
                             <div class="chh-hero__content">

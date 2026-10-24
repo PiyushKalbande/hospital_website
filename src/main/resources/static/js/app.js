@@ -125,11 +125,11 @@
 
   /* ------------------------------------------------- horizontal rails */
   function initRails() {
-    $$('[data-chh-rail]').forEach(railId => {
-      const rail = $(railId);
+    $$('[data-chh-rail]').forEach(rail => {
+      const railSelector = rail.dataset.chhRail || ('#' + rail.id);
       if (!rail) return;
-      const prev = $('[data-chh-rail-prev="' + railId + '"]');
-      const next = $('[data-chh-rail-next="' + railId + '"]');
+      const prev = $('[data-chh-rail-prev="' + railSelector + '"]');
+      const next = $('[data-chh-rail-next="' + railSelector + '"]');
       const step = () => Math.max(rail.clientWidth * 0.8, 260);
       prev && prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: 'smooth' }));
       next && next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: 'smooth' }));
@@ -146,12 +146,12 @@
     }
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting || entry.intersectionRatio > 0) {
           entry.target.classList.add('in');
           io.unobserve(entry.target);
         }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    }, { rootMargin: '0px', threshold: 0 });
     targets.forEach(t => io.observe(t));
   }
 
