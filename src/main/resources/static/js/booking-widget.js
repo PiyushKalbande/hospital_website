@@ -521,7 +521,13 @@
   function renderSlots(day) {
     const area = $('#chhSlotGroups');
     const empty = $('#chhSlotEmpty');
+    const notice = $('#chhSlotNotice');
     area.innerHTML = '';
+
+    if (notice) {
+      notice.textContent = day && day.reason ? day.reason : '';
+      notice.style.display = day && day.reason ? 'flex' : 'none';
+    }
 
     const slots = day.slots || [];
     const open = slots.filter(s => s.available);
@@ -796,7 +802,7 @@
     wa.innerHTML = svgIcon('whatsapp') + '<span>' + t('whatsapp') + '</span>';
     wa.target = '_blank';
     wa.rel = 'noopener';
-    wa.href = 'https://wa.me/919422100108?text=' + encodeURIComponent(
+    wa.href = 'https://wa.me/917083682563?text=' + encodeURIComponent(
       'Chinche Hospital booking ' + c.referenceNo + ' — ' + (c.doctorName || '') + ' on ' + c.appointmentDate);
 
     const track = el('a', 'chh-btn chh-btn--ghost');

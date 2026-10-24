@@ -30,7 +30,7 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final AppProperties props;
 
-    @Value("${chinche.mail.from:no-reply@chinchehospital.in}")
+    @Value("${chinche.mail.from:dadakalbande111@gmail.com}")
     private String fromAddress;
 
     @Async("notificationExecutor")

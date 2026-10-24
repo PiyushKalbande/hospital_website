@@ -12,5 +12,9 @@ public interface DoctorLeaveRepository extends JpaRepository<DoctorLeave, Long> 
 
     List<DoctorLeave> findByDoctorIdAndLeaveDateBetween(Long doctorId, LocalDate from, LocalDate to);
 
+    List<DoctorLeave> findByLeaveDateBetween(LocalDate from, LocalDate to);
+
+    void deleteByDoctorIdAndLeaveDateBetween(Long doctorId, LocalDate from, LocalDate to);
+
     boolean existsByDoctorIdAndLeaveDate(Long doctorId, LocalDate date);
 }

@@ -414,6 +414,16 @@ a:hover { color: var(--chh-primary-dark); }
 .chh-mega__foot { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--chh-line);
                   display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 
+.chh-mega::before {
+  content: "";
+  position: absolute;
+  top: -12px; /* यह 10px के खाली गैप को अदृश्य रूप से भर देगा */
+  left: 0;
+  width: 100%;
+  height: 12px;
+  background: transparent; /* यह दिखेगा नहीं, सिर्फ माउस को रोकेगा */
+}
+
 .chh-header-search { position: relative; flex: 1 1 260px; max-width: 340px; }
 .chh-header-search input {
   width: 100%; padding: 10px 14px 10px 40px; border-radius: var(--chh-r-pill);
@@ -1057,4 +1067,22 @@ a:hover { color: var(--chh-primary-dark); }
   body { background: #fff; font-size: 12px; }
   .chh-booking__shell { box-shadow: none; border: 1px solid #ccc; }
   .chh-reference { background: #fff; color: #000; border: 2px dashed #000; }
+}
+
+/* 1. बटन के अंदर के SVG आइकॉन का साइज फिक्स करें */
+svg {
+  width: 1.2rem;       /* आइकॉन का साइज टेक्स्ट के अनुपात में रखें */
+  height: 1.2rem;
+  flex-shrink: 0;      /* आइकॉन को सिकुड़ने या दबने से रोकेगा */
+  display: block;      /* एक्स्ट्रा बॉटम स्पेसिंग हटाएगा */
+}
+
+/* 2. अगर आप चाहते हैं कि ये बटन बहुत ज्यादा लंबे न दिखें, तो एक मैक्सिमम चौड़ाई दे सकते हैं */
+.chh-btn {
+  max-width: max-content; /* बटन को जबरदस्ती फैलने से रोकेगा */
+}
+
+/* 3. Ghost बटन का बैकग्राउंड सही करने के लिए (अगर पहले से कोई ग्लोबल CSS आ रही हो) */
+.chh-btn--ghost {
+  background-color: transparent !important; /* ताकि वह पीछे के बैकग्राउंड के साथ मिक्स रहे */
 }

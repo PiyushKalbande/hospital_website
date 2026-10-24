@@ -26,7 +26,7 @@
                 <div class="chh-booking__head-side">
                     <a class="chh-booking__phone" th:href="'tel:' + ${#strings.replace(contact.phone,' ','')}">
                         <svg><use href="/img/icons/sprite.svg#phone"></use></svg>
-                        <span th:text="${contact.phone}">+91 712 240 1100</span>
+                        <span th:text="${contact.phone}">+91 70836 82563</span>
                     </a>
                     <span class="chh-badge-dot chh-badge-dot--live" style="color:#BFE8DC">
                         <span th:text="#{booking.title.mr}">ऑनलाइन बुकिंग</span>
@@ -164,6 +164,7 @@
                         <div class="chh-datestrip" id="chhDateStrip"></div>
 
                         <div id="chhSlotArea">
+                            <div class="chh-alert chh-alert--info mb-3" id="chhSlotNotice" style="display:none"></div>
                             <div class="chh-empty" id="chhSlotEmpty" style="display:none">
                                 <span class="chh-empty__icon"><svg><use href="/img/icons/sprite.svg#clock"></use></svg></span>
                                 <div th:text="#{booking.no.slots}">No slots open on this date.</div>

@@ -23,7 +23,7 @@ public class OpenApiConfig {
                                 + "slot availability, multi-step appointment booking, health packages and CMS content.")
                         .contact(new Contact()
                                 .name("Digital Care Team")
-                                .email("it@chinchehospital.in")
+                                .email("dadakalbande111@gmail.com")
                                 .url("https://chinchehospital.in"))
                         .license(new License().name("Proprietary")))
                 .servers(List.of(new Server().url("/").description("This instance")));

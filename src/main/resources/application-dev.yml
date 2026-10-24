@@ -23,6 +23,10 @@ spring:
   thymeleaf:
     cache: false
 
+chinche:
+  seeding:
+    enabled: ${SEED_DEMO_DATA:true}
+
 logging:
   level:
     in.chinche.hospital: DEBUG

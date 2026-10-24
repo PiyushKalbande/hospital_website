@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       layout:decorate="~{admin/layout}">
 <head><title layout:fragment="title">Doctors | Chinche Hospital Admin</title></head>
 <body>
@@ -8,14 +9,26 @@
     <div class="chh-admin__head">
         <div><h1 class="chh-h2">Doctors</h1>
             <p class="chh-small chh-muted mb-0"><b th:text="${#lists.size(doctors)}">0</b> active consultants.</p></div>
+        <div class="d-flex align-items-end gap-2 flex-wrap">
+            <form class="d-flex align-items-end gap-2" method="get" th:action="@{/admin/doctors}" th:if="${!calendarView}">
+                <div><label class="chh-label" for="attendance-date">Attendance date</label>
+                    <input class="chh-input" id="attendance-date" name="date" type="date" th:value="${selectedDate}"></div>
+                <button class="chh-btn chh-btn--outline" type="submit">View day</button>
+            </form>
+            <a sec:authorize="hasRole('ADMIN')" class="chh-btn chh-btn--primary" th:if="${!calendarView}"
+               th:href="@{/admin/doctors(view='calendar',date=${selectedDate})}">Leave Calendar</a>
+            <a class="chh-btn chh-btn--outline" th:if="${calendarView}"
+               th:href="@{/admin/doctors(date=${selectedDate})}">Doctors</a>
+        </div>
     </div>
-    <div class="chh-card">
+    <div class="chh-card" th:if="${!calendarView}">
         <div class="table-responsive">
             <table class="chh-table">
                 <thead><tr><th>Name</th><th>Speciality</th><th>Centre</th><th>Exp.</th><th>Fee</th><th>Video</th><th>Rating</th><th></th></tr></thead>
                 <tbody>
-                <tr th:each="d : ${doctors}">
-                    <td><div class="chh-strong" th:text="${d.name}">Name</div>
+                <th:block th:each="d : ${doctors}">
+                <tr>
+                    <td><a class="chh-strong" th:href="${selectedDoctorId != null and selectedDoctorId == d.id ? '/admin/doctors?date=' + selectedDate : '/admin/doctors?doctorId=' + d.id + '&date=' + selectedDate}" th:text="${d.name}">Name</a>
                         <div class="chh-tiny chh-faint" th:text="${d.designation}">Designation</div></td>
                     <td class="chh-small" th:text="${d.speciality != null} ? ${d.speciality.name} : '—'">Speciality</td>
                     <td class="chh-small" th:text="${d.facility != null} ? ${d.facility.city} : '—'">City</td>
@@ -24,12 +37,85 @@
                     <td><span class="chh-chip chh-chip--indigo" th:if="${d.teleconsultEnabled}">Yes</span>
                         <span class="chh-tiny chh-faint" th:unless="${d.teleconsultEnabled}">No</span></td>
                     <td class="chh-num chh-small" th:text="${d.rating}">0</td>
-                    <td><a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/doctors/' + ${d.slug}}">View</a></td>
+                    <td class="d-flex gap-1"><a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{'/doctors/' + ${d.slug}}">View</a>
+                        <a class="chh-btn chh-btn--outline chh-btn--sm" th:href="${selectedDoctorId != null and selectedDoctorId == d.id ? '/admin/doctors?date=' + selectedDate : '/admin/doctors?doctorId=' + d.id + '&date=' + selectedDate}"
+                           th:text="${selectedDoctorId != null and selectedDoctorId == d.id ? 'Close' : 'Attendance'}">Attendance</a></td>
                 </tr>
+                <tr th:if="${selectedDoctorId != null and selectedDoctorId == d.id}">
+                    <td colspan="8" class="p-0">
+                        <div class="chh-card" th:with="a=${attendanceByDoctor[d.id]}">
+                            <div class="chh-card__body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div><h2 class="chh-h3 mb-1" th:text="${d.name} + ' attendance'">Doctor attendance</h2>
+                                        <p class="chh-small chh-muted mb-0">Attendance and leave changes apply only to this doctor.</p></div>
+                                    <span class="chh-chip chh-chip--outline" th:text="${selectedDate}">Date</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-xl-7">
+                                        <form method="post" th:action="@{'/admin/doctors/' + ${d.id} + '/attendance'}">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <input type="hidden" name="date" th:value="${selectedDate}">
+                                            <div class="row g-2 align-items-end">
+                                                <div class="col-sm-4"><label class="chh-label">Arrived</label><input class="chh-input" type="time" name="arrival" th:value="${a != null and a.arrivalTime != null ? a.arrivalTime : ''}"></div>
+                                                <div class="col-sm-4"><label class="chh-label">Left</label><input class="chh-input" type="time" name="departure" th:value="${a != null and a.departureTime != null ? a.departureTime : ''}"></div>
+                                                <div class="col-sm-4"><button class="chh-btn chh-btn--primary w-100" type="submit">Save attendance</button></div>
+                                            </div>
+                                            <div class="mt-3"><div class="d-flex justify-content-between align-items-center mb-1"><label class="chh-label mb-0">Away intervals</label><button class="chh-btn chh-btn--ghost chh-btn--sm" type="button" onclick="addBreak(this)">+ Add break</button></div>
+                                                <div class="attendance-breaks"><div class="row g-2 mb-2" th:each="b : ${a != null ? a.breaks : null}" th:if="${b != null}"><div class="col-5"><input class="chh-input" type="time" name="breakStart" th:value="${b.startTime}"></div><div class="col-5"><input class="chh-input" type="time" name="breakEnd" th:value="${b.endTime}"></div><div class="col-2"><button class="chh-btn chh-btn--ghost chh-btn--sm w-100" type="button" onclick="this.closest('.row').remove()">Remove</button></div></div></div>
+                                            </div>
+                                            <div class="mt-2"><label class="chh-label">Notes</label><input class="chh-input" type="text" name="notes" maxlength="500" placeholder="Optional note" th:value="${a != null ? a.notes : ''}"></div>
+                                        </form>
+                                    </div>
+                                    <div class="col-12 col-xl-5">
+                                        <form method="post" th:action="@{'/admin/doctors/' + ${d.id} + '/leave'}">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <h3 class="chh-h4">Mark leave</h3>
+                                            <p class="chh-small chh-muted">This range will be blocked in public booking.</p>
+                                            <div class="row g-2"><div class="col-sm-6"><label class="chh-label">From</label><input class="chh-input" type="date" name="from" th:value="${selectedDate}"></div><div class="col-sm-6"><label class="chh-label">To</label><input class="chh-input" type="date" name="to" th:value="${selectedDate}"></div></div>
+                                            <input class="chh-input mt-2" type="text" name="reason" maxlength="200" placeholder="Reason (optional)">
+                                            <button class="chh-btn chh-btn--outline mt-2" type="submit">Save leave</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </th:block>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <section sec:authorize="hasRole('ADMIN')" class="mt-4" th:if="${calendarView}">
+        <div class="chh-card">
+            <div class="chh-card__body">
+                <h3 class="chh-h3 mb-1">Leave calendar</h3>
+                <p class="chh-small chh-muted">Mark a continuous leave range. Each date is retained in the database and suppresses booking slots.</p>
+                <div class="table-responsive mb-3">
+                    <table class="chh-table"><thead><tr><th>Doctor</th><th th:each="calendarDate : ${calendarDates}" class="chh-tiny" th:text="${#temporals.format(calendarDate, 'dd MMM')}">01 Jan</th></tr></thead>
+                        <tbody><tr th:each="d : ${doctors}"><td class="chh-strong" th:text="${d.name}">Doctor</td>
+                            <td th:each="calendarDate : ${calendarDates}" class="text-center">
+                                <span class="chh-chip chh-chip--clay" th:if="${leaveDatesByDoctor[d.id] != null and #lists.contains(leaveDatesByDoctor[d.id], calendarDate)}">Leave</span>
+                                <span class="chh-tiny chh-faint" th:unless="${leaveDatesByDoctor[d.id] != null and #lists.contains(leaveDatesByDoctor[d.id], calendarDate)}">-</span>
+                            </td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
+<th:block layout:fragment="scripts">
+<script>
+function addBreak(button) {
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2';
+    row.innerHTML = '<div class="col-5"><input class="chh-input" type="time" name="breakStart"></div>' +
+        '<div class="col-5"><input class="chh-input" type="time" name="breakEnd"></div>' +
+        '<div class="col-2"><button class="chh-btn chh-btn--ghost chh-btn--sm w-100" type="button" onclick="this.closest(\'.row\').remove()">Remove</button></div>';
+    button.closest('form').querySelector('.attendance-breaks').appendChild(row);
+}
+</script>
+</th:block>
 </body>
 </html>

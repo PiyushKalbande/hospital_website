@@ -84,8 +84,8 @@ public class DemoDataSeeder {
                 .facilityType(FacilityType.MAIN_HOSPITAL)
                 .city("Katol").district("Nagpur").state("Maharashtra").pincode("441302")
                 .addressLine("मुळाई रोड, बस स्थानक चौक, कटोल, जि. नागपूर — 441302")
-                .phone("+91 712 240 1100").emergencyPhone("+91 94221 00108")
-                .email("care@chinchehospital.in")
+                .phone("+91 70836 82563").emergencyPhone("+91 70836 82563")
+                .email("dadakalbande111@gmail.com")
                 .latitude(21.2705).longitude(78.5839)
                 .rating(4.7).reviewCount(1284).bedCount(120)
                 .amenities("icu,ot,emergency,pharmacy,diagnostics,ambulance,maternity,cashless")
@@ -98,7 +98,7 @@ public class DemoDataSeeder {
                 .facilityType(FacilityType.CLINIC)
                 .city("Narkhed").district("Nagpur").state("Maharashtra").pincode("441304")
                 .addressLine("मुख्य बाजार चौक, नरखेड, जि. नागपूर — 441304")
-                .phone("+91 712 255 3300").emergencyPhone("+91 94221 00108")
+                .phone("+91 70836 82563").emergencyPhone("+91 70836 82563")
                 .latitude(21.4683).longitude(78.5985).rating(4.5).reviewCount(412).bedCount(12)
                 .amenities("opd,pharmacy,diagnostics,ambulance")
                 .hoursText("OPD 9:00 AM – 2:00 PM, 5:00 PM – 9:00 PM")
@@ -110,7 +110,7 @@ public class DemoDataSeeder {
                 .facilityType(FacilityType.CLINIC)
                 .city("Saoner").district("Nagpur").state("Maharashtra").pincode("441101")
                 .addressLine("नागपूर रोड, सावनेर, जि. नागपूर — 441101")
-                .phone("+91 712 266 4400").emergencyPhone("+91 94221 00108")
+                .phone("+91 70836 82563").emergencyPhone("+91 70836 82563")
                 .latitude(21.3850).longitude(78.9200).rating(4.4).reviewCount(356).bedCount(10)
                 .amenities("opd,pharmacy,diagnostics")
                 .hoursText("OPD 9:00 AM – 1:00 PM, 4:00 PM – 8:00 PM")
@@ -122,7 +122,7 @@ public class DemoDataSeeder {
                 .facilityType(FacilityType.DIAGNOSTIC_CENTRE)
                 .city("Katol").district("Nagpur").state("Maharashtra").pincode("441302")
                 .addressLine("स्टेशन रोड, कटोल, जि. नागपूर — 441302")
-                .phone("+91 712 240 1122").emergencyPhone("+91 94221 00108")
+                .phone("+91 70836 82563").emergencyPhone("+91 70836 82563")
                 .latitude(21.2740).longitude(78.5860).rating(4.6).reviewCount(698).bedCount(0)
                 .amenities("diagnostics,home_collection,pharmacy")
                 .hoursText("Sample collection 6:30 AM – 8:00 PM")
@@ -908,17 +908,18 @@ public class DemoDataSeeder {
     private void ensureAdminUser(PasswordEncoder encoder) {
         if (users.count() > 0) return;
         String rawPassword = System.getenv().getOrDefault("ADMIN_PASSWORD", "Chinche@2026");
-        String adminEmail = System.getenv().getOrDefault("ADMIN_EMAIL", "admin@chinchehospital.in");
+        String receptionPassword = System.getenv().getOrDefault("RECEPTION_PASSWORD", "Reception@2026");
+        String adminEmail = System.getenv().getOrDefault("ADMIN_EMAIL", "dadakalbande111@gmail.com");
 
         users.save(AppUser.builder()
                 .username("admin").password(encoder.encode(rawPassword))
                 .fullName("Hospital Administrator").email(adminEmail)
                 .role(UserRole.ROLE_ADMIN).enabled(true).build());
         users.save(AppUser.builder()
-                .username("reception").password(encoder.encode("Reception@2026"))
-                .fullName("Front Desk — Katol").email("frontdesk@chinchehospital.in")
+                .username("reception").password(encoder.encode(receptionPassword))
+                .fullName("Front Desk — Katol").email("dadakalbande111@gmail.com")
                 .role(UserRole.ROLE_RECEPTIONIST).enabled(true).build());
-        log.info("Seeded staff accounts: admin / reception (passwords via ADMIN_PASSWORD env or defaults).");
+        log.info("Seeded staff accounts: admin / reception (passwords via environment or demo defaults).");
     }
 
     // ------------------------------------------------------------------ helpers

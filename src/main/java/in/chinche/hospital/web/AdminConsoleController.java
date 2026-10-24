@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 /** Server-rendered staff console. Locked to ROLE_ADMIN / ROLE_RECEPTIONIST. */
@@ -28,6 +29,7 @@ public class AdminConsoleController {
     private final CatalogService catalogue;
     private final EnquiryService enquiryService;
     private final FacilityService facilityService;
+    private final DoctorAttendanceService doctorAttendanceService;
     private final AppointmentRepositoryFacade appointments;
 
     @GetMapping({"", "/", "/dashboard"})
@@ -68,13 +70,63 @@ public class AdminConsoleController {
     }
 
     @GetMapping("/doctors")
-    public String doctors(Model model) {
-        model.addAttribute("doctors", doctorService.all());
+    public String doctors(@RequestParam(required = false) LocalDate date,
+                          @RequestParam(required = false) Long doctorId,
+                          @RequestParam(required = false, defaultValue = "doctors") String view,
+                          Model model) {
+        LocalDate selectedDate = date == null ? LocalDate.now() : date;
+        LocalDate calendarEnd = selectedDate.plusDays(30);
+        var doctorList = doctorService.all();
+        model.addAttribute("doctors", doctorList);
         model.addAttribute("specialities", catalogue.allSpecialities());
         model.addAttribute("facilities", facilityService.all());
+        model.addAttribute("selectedDate", selectedDate);
+        model.addAttribute("attendanceByDoctor", doctorAttendanceService.attendanceFor(selectedDate));
+        model.addAttribute("leaveDatesByDoctor", doctorAttendanceService.leaveDates(selectedDate, calendarEnd));
+        model.addAttribute("calendarDates", selectedDate.datesUntil(calendarEnd.plusDays(1)).toList());
+        model.addAttribute("selectedDoctorId", doctorId);
+        model.addAttribute("selectedDoctor", doctorList.stream().filter(d -> d.getId().equals(doctorId)).findFirst().orElse(null));
+        model.addAttribute("calendarView", "calendar".equalsIgnoreCase(view));
         model.addAttribute("pageTitle", "Doctors | Chinche Hospital Admin");
         model.addAttribute("activeView", "doctors");
         return "admin/doctors";
+    }
+
+    @PostMapping("/doctors/{doctorId}/attendance")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String saveDoctorAttendance(@PathVariable Long doctorId,
+                                       @RequestParam LocalDate date,
+                                       @RequestParam(required = false) LocalTime arrival,
+                                       @RequestParam(required = false) LocalTime departure,
+                                       @RequestParam(name = "breakStart", required = false) List<LocalTime> breakStarts,
+                                       @RequestParam(name = "breakEnd", required = false) List<LocalTime> breakEnds,
+                                       @RequestParam(required = false) String notes,
+                                       RedirectAttributes flash) {
+        try {
+            doctorAttendanceService.saveAttendance(doctorId, date, arrival, departure,
+                    breakStarts == null ? List.of() : breakStarts,
+                    breakEnds == null ? List.of() : breakEnds, notes);
+            flash.addFlashAttribute("success", "Attendance saved for " + date + ".");
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/doctors?date=" + date;
+    }
+
+    @PostMapping("/doctors/{doctorId}/leave")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String saveDoctorLeave(@PathVariable Long doctorId,
+                                  @RequestParam LocalDate from,
+                                  @RequestParam LocalDate to,
+                                  @RequestParam(required = false) String reason,
+                                  RedirectAttributes flash) {
+        try {
+            int days = doctorAttendanceService.setLeave(doctorId, from, to, reason);
+            flash.addFlashAttribute("success", "Leave marked for " + days + " day(s).");
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/doctors?date=" + from;
     }
 
     @GetMapping("/catalogue")
