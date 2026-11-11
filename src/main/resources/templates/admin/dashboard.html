@@ -90,7 +90,7 @@
                     <tr th:each="a : ${todayBookings}">
                         <td class="chh-mono chh-tiny" th:text="${a.referenceNo}">CHH-…</td>
                         <td class="chh-num chh-small" th:text="${#temporals.format(a.slotStart,'h:mm a')}">9:00</td>
-                        <td class="chh-strong" th:text="${a.patient.fullName}">Patient</td>
+                        <td class="chh-strong" th:text="${a.patientNameDisplay}">Patient</td>
                         <td class="chh-small" th:text="${a.doctor != null} ? ${a.doctor.name} : '—'">Doctor</td>
                         <td><span class="chh-chip chh-chip--outline" th:text="${a.serviceType.label}">Type</span></td>
                         <td><span class="chh-status"

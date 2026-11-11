@@ -33,4 +33,8 @@ public class AppUser extends BaseEntity {
 
     @Column(name = "last_login_at")
     private java.time.Instant lastLoginAt;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctor_id", unique = true)
+    private Doctor doctor;
 }

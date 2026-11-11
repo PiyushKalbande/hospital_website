@@ -25,7 +25,14 @@ spring:
 
 chinche:
   seeding:
-    enabled: ${SEED_DEMO_DATA:true}
+    enabled: ${SEED_DEMO_DATA:false}
+  assistant:
+    allow-unverified-knowledge: ${AI_ALLOW_UNVERIFIED_KNOWLEDGE:true}
+
+management:
+  health:
+    mail:
+      enabled: false
 
 logging:
   level:

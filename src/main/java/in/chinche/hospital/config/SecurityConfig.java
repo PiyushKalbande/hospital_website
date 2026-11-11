@@ -57,12 +57,17 @@ public class SecurityConfig {
                     // are matched by that pattern, and denying them locks the console shut
                     // for anonymous users (403 on the very page used to authenticate).
                     .requestMatchers("/admin/login", "/admin/logout").permitAll()
+                    .requestMatchers("/doctor/**").hasRole("DOCTOR")
                     .requestMatchers("/admin/**", "/api/v1/admin/**").hasAnyRole("ADMIN", "RECEPTIONIST")
                     .anyRequest().permitAll())
             .formLogin(form -> form
                     .loginPage("/admin/login")
                     .loginProcessingUrl("/admin/login")
-                    .defaultSuccessUrl("/admin/dashboard", true)
+                    .successHandler((request, response, authentication) -> {
+                        boolean doctor = authentication.getAuthorities().stream()
+                                .anyMatch(authority -> "ROLE_DOCTOR".equals(authority.getAuthority()));
+                        response.sendRedirect(doctor ? "/doctor/dashboard" : "/admin/dashboard");
+                    })
                     .failureUrl("/admin/login?error")
                     .permitAll())
             .logout(logout -> logout

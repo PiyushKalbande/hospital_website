@@ -1,17 +1,25 @@
 package in.chinche.hospital.web;
 
+import in.chinche.hospital.dto.response.ApiResponse;
 import in.chinche.hospital.domain.Appointment;
 import in.chinche.hospital.domain.enums.AppointmentStatus;
+import in.chinche.hospital.exception.SlotUnavailableException;
 import in.chinche.hospital.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -26,11 +34,13 @@ public class AdminConsoleController {
     private final AdminStatsService stats;
     private final BookingService bookingService;
     private final DoctorService doctorService;
+    private final DoctorAccountService doctorAccounts;
     private final CatalogService catalogue;
     private final EnquiryService enquiryService;
     private final FacilityService facilityService;
     private final DoctorAttendanceService doctorAttendanceService;
     private final AppointmentRepositoryFacade appointments;
+    private final AppointmentUpdatePublisher appointmentUpdates;
 
     @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model) {
@@ -48,6 +58,62 @@ public class AdminConsoleController {
                                @RequestParam(required = false) String date,
                                @RequestParam(required = false, defaultValue = "0") int page,
                                Model model) {
+        populateAppointmentModel(status, date, page, model);
+        return "admin/appointments";
+    }
+
+    @GetMapping("/appointment-emergencies")
+    public String appointmentEmergencies(Model model) {
+        List<EmergencyNotice> notices = appointments.emergencyQueue();
+        model.addAttribute("emergencyNotices", notices);
+        model.addAttribute("pageTitle", "Urgent Reschedules | Chinche Hospital Admin");
+        model.addAttribute("activeView", "appointment-emergencies");
+        return "admin/emergencies";
+    }
+
+    @GetMapping("/appointments/fragment")
+    public String appointmentFragment(@RequestParam(required = false) String status,
+                                     @RequestParam(required = false) String date,
+                                     @RequestParam(required = false, defaultValue = "0") int page,
+                                     Model model) {
+        populateAppointmentModel(status, date, page, model);
+        return "admin/appointments :: appointmentResults";
+    }
+
+    @GetMapping(value = "/api/appointments/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter appointmentEvents() {
+        return appointmentUpdates.subscribeAdmin();
+    }
+
+    @PostMapping("/api/appointments/{id}/status")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<Void>> updateStatusLive(
+            @PathVariable Long id,
+            @RequestParam AppointmentStatus status,
+            @RequestParam(required = false) String note) {
+        try {
+            bookingService.updateStatus(id, status, note);
+            return ResponseEntity.ok(ApiResponse.ok("Appointment updated.", null));
+        } catch (SlotUnavailableException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.fail(ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/appointments/{id}/status")
+    public String updateStatus(@PathVariable Long id,
+                               @RequestParam AppointmentStatus status,
+                               @RequestParam(required = false) String note,
+                               RedirectAttributes flash) {
+        try {
+            bookingService.updateStatus(id, status, note);
+            flash.addFlashAttribute("success", "Booking " + id + " marked as " + status.getLabel() + ".");
+        } catch (SlotUnavailableException ex) {
+            flash.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/appointments";
+    }
+
+    private void populateAppointmentModel(String status, String date, int page, Model model) {
         Page<Appointment> result = appointments.query(status, date, page, 20);
         model.addAttribute("appointments", result);
         model.addAttribute("statuses", List.of(AppointmentStatus.values()));
@@ -55,18 +121,6 @@ public class AdminConsoleController {
         model.addAttribute("date", date);
         model.addAttribute("pageTitle", "Appointments | Chinche Hospital Admin");
         model.addAttribute("activeView", "appointments");
-        return "admin/appointments";
-    }
-
-    @PostMapping("/appointments/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String updateStatus(@PathVariable Long id,
-                               @RequestParam AppointmentStatus status,
-                               @RequestParam(required = false) String note,
-                               RedirectAttributes flash) {
-        appointments.updateStatus(id, status, note);
-        flash.addFlashAttribute("success", "Booking " + id + " marked as " + status.getLabel() + ".");
-        return "redirect:/admin/appointments";
     }
 
     @GetMapping("/doctors")
@@ -78,6 +132,8 @@ public class AdminConsoleController {
         LocalDate calendarEnd = selectedDate.plusDays(30);
         var doctorList = doctorService.all();
         model.addAttribute("doctors", doctorList);
+        model.addAttribute("doctorUsernames", doctorAccounts.usernamesForDoctors(
+            doctorList.stream().map(doctor -> doctor.getId()).toList()));
         model.addAttribute("specialities", catalogue.allSpecialities());
         model.addAttribute("facilities", facilityService.all());
         model.addAttribute("selectedDate", selectedDate);
@@ -92,6 +148,22 @@ public class AdminConsoleController {
         return "admin/doctors";
     }
 
+    @PostMapping("/doctors/{doctorId}/account")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createDoctorAccount(@PathVariable Long doctorId,
+                                      @RequestParam String username,
+                                      @RequestParam String initialPassword,
+                                      RedirectAttributes flash) {
+        try {
+            String createdUsername = doctorAccounts.createAccount(doctorId, username, initialPassword);
+            flash.addFlashAttribute("success", "Doctor login '" + createdUsername
+                    + "' created. Share the initial password with the doctor through a secure channel.");
+        } catch (IllegalArgumentException ex) {
+            flash.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/doctors?doctorId=" + doctorId;
+    }
+
     @PostMapping("/doctors/{doctorId}/attendance")
     @PreAuthorize("hasRole('ADMIN')")
     public String saveDoctorAttendance(@PathVariable Long doctorId,
@@ -101,17 +173,63 @@ public class AdminConsoleController {
                                        @RequestParam(name = "breakStart", required = false) List<LocalTime> breakStarts,
                                        @RequestParam(name = "breakEnd", required = false) List<LocalTime> breakEnds,
                                        @RequestParam(required = false) String notes,
-                                       RedirectAttributes flash) {
+                           @RequestParam(required = false, defaultValue = "false") boolean confirmAffected,
+                           @RequestParam(name = "approvedAppointmentIds", required = false) List<Long> approvedAppointmentIds,
+                           @RequestParam(required = false) String emergencyReason,
+                           Model model, RedirectAttributes flash) {
+        List<LocalTime> normalizedStarts = breakStarts == null ? List.of() : breakStarts;
+        List<LocalTime> normalizedEnds = breakEnds == null ? List.of() : breakEnds;
         try {
-            doctorAttendanceService.saveAttendance(doctorId, date, arrival, departure,
-                    breakStarts == null ? List.of() : breakStarts,
-                    breakEnds == null ? List.of() : breakEnds, notes);
-            flash.addFlashAttribute("success", "Attendance saved for " + date + ".");
+            if (confirmAffected) {
+            int affected = doctorAttendanceService.confirmAttendanceChange(doctorId, date, arrival, departure,
+                normalizedStarts, normalizedEnds, notes, approvedAppointmentIds, emergencyReason);
+            flash.addFlashAttribute("success", "Attendance saved for " + date + ". " + affected
+                + " affected patient(s) were added to urgent reschedules and notified.");
+            } else {
+            List<Appointment> conflicts = doctorAttendanceService.attendanceConflicts(
+                doctorId, date, arrival, departure, normalizedStarts, normalizedEnds);
+            if (!conflicts.isEmpty()) {
+                attendanceConfirmationModel(model, doctorId, date, arrival, departure,
+                    normalizedStarts, normalizedEnds, notes, conflicts, null);
+                return "admin/attendance-confirmation";
+            }
+            doctorAttendanceService.saveAttendance(
+                doctorId, date, arrival, departure, normalizedStarts, normalizedEnds, notes);
+            flash.addFlashAttribute("success", "Attendance and breaks saved for " + date + ".");
+            }
         } catch (IllegalArgumentException ex) {
+            if (confirmAffected) {
+            List<Appointment> currentConflicts = doctorAttendanceService.attendanceConflicts(
+                doctorId, date, arrival, departure, normalizedStarts, normalizedEnds);
+            if (!currentConflicts.isEmpty()) {
+                attendanceConfirmationModel(model, doctorId, date, arrival, departure,
+                    normalizedStarts, normalizedEnds, notes, currentConflicts, ex.getMessage());
+                return "admin/attendance-confirmation";
+            }
+            }
             flash.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/doctors?date=" + date;
     }
+
+        private static void attendanceConfirmationModel(Model model, Long doctorId, LocalDate date,
+                                 LocalTime arrival, LocalTime departure,
+                                 List<LocalTime> breakStarts, List<LocalTime> breakEnds,
+                                 String notes, List<Appointment> conflicts, String error) {
+        model.addAttribute("doctorId", doctorId);
+        model.addAttribute("date", date);
+        model.addAttribute("arrival", arrival);
+        model.addAttribute("departure", departure);
+        model.addAttribute("breakStarts", breakStarts);
+        model.addAttribute("breakEnds", breakEnds);
+        model.addAttribute("notes", notes);
+        model.addAttribute("affectedAppointments", conflicts);
+        model.addAttribute("hasCheckedIn", conflicts.stream()
+            .anyMatch(appointment -> appointment.getStatus() == AppointmentStatus.CHECKED_IN));
+        model.addAttribute("error", error);
+        model.addAttribute("pageTitle", "Confirm attendance changes | Chinche Hospital Admin");
+        model.addAttribute("activeView", "doctors");
+        }
 
     @PostMapping("/doctors/{doctorId}/leave")
     @PreAuthorize("hasRole('ADMIN')")
@@ -170,6 +288,13 @@ public class AdminConsoleController {
             return repo.findByAppointmentDateOrderBySlotStartAsc(LocalDate.now());
         }
 
+        public List<EmergencyNotice> emergencyQueue() {
+            return repo.findByStatusAndRescheduleReasonIsNotNullOrderByAppointmentDateAscSlotStartAsc(
+                            AppointmentStatus.RESCHEDULED).stream()
+                    .map(appointment -> new EmergencyNotice(appointment, whatsappUrl(appointment)))
+                    .toList();
+        }
+
         public Page<Appointment> query(String status, String date, int page, int size) {
             PageRequest pr = PageRequest.of(Math.max(page, 0), size);
             if (date != null && !date.isBlank()) {
@@ -187,12 +312,22 @@ public class AdminConsoleController {
                     : repo.findByStatusOrderByCreatedAtDesc(AppointmentStatus.valueOf(status.toUpperCase()), pr);
         }
 
-        public void updateStatus(Long id, AppointmentStatus status, String note) {
-            repo.findById(id).ifPresent(a -> {
-                a.setStatus(status);
-                if (note != null && !note.isBlank()) a.setInternalNotes(note);
-                repo.save(a);
-            });
-        }
     }
+
+        public record EmergencyNotice(Appointment appointment, String whatsappUrl) {
+        }
+
+        private static String whatsappUrl(Appointment appointment) {
+        if (appointment.getPatient() == null || !appointment.getPatient().isConsentSms()) return null;
+        String phone = appointment.getPatientPhoneDisplay() == null
+            ? "" : appointment.getPatientPhoneDisplay().replaceAll("[^0-9]", "");
+        if (phone.isBlank()) return null;
+        String message = "Namaskar " + appointment.getPatientNameDisplay()
+            + ", Chinche Hospital has an urgent update about your appointment on "
+            + appointment.getAppointmentDate() + " at " + appointment.getSlotStart()
+            + ". The doctor is unexpectedly unavailable. Please contact us to choose another time."
+            + " Booking reference: " + appointment.getReferenceNo() + ".";
+        return "https://wa.me/" + phone + "?text="
+            + UriUtils.encodeQueryParam(message, StandardCharsets.UTF_8);
+        }
 }

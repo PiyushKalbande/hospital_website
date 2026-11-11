@@ -24,9 +24,18 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByAppointmentDateOrderBySlotStartAsc(LocalDate date);
 
+    List<Appointment> findByDoctorIdAndAppointmentDateBetweenOrderByAppointmentDateAscSlotStartAsc(
+            Long doctorId, LocalDate from, LocalDate to);
+
     Page<Appointment> findByStatusOrderByCreatedAtDesc(AppointmentStatus status, Pageable pageable);
 
     Page<Appointment> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    List<Appointment> findByStatusAndRescheduleReasonIsNotNullOrderByAppointmentDateAscSlotStartAsc(
+            AppointmentStatus status);
+
+    List<Appointment> findByDoctorIdAndAppointmentDateAndStatusInOrderBySlotStartAsc(
+            Long doctorId, LocalDate date, List<AppointmentStatus> statuses);
 
     /** Slots still considered "taken" for a doctor on a date (cancellations free the slot). */
     @Query("""
@@ -45,6 +54,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             Long doctorId, LocalDate date, LocalTime slotStart, VisitMode mode, List<AppointmentStatus> excluded);
 
     long countByAppointmentDate(LocalDate date);
+
+    long countByDoctorIdAndAppointmentDateAndStatusIn(
+            Long doctorId, LocalDate date, List<AppointmentStatus> statuses);
 
     long countByStatus(AppointmentStatus status);
 

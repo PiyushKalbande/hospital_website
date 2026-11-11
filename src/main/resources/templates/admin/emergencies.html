@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head><title layout:fragment="title">Urgent Reschedules | Chinche Hospital Admin</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div>
+            <h1 class="chh-h2">Urgent reschedules</h1>
+            <p class="chh-small chh-muted mb-0">Appointments affected by a doctor emergency.</p>
+        </div>
+        <span class="chh-status chh-status--cancelled" th:text="${emergencyNotices.size()} + ' patients to contact'">0 patients to contact</span>
+    </div>
+
+    <section th:if="${!emergencyNotices.isEmpty()}" class="chh-card mb-3"
+             style="border:2px solid #b42332;background:#fff5f5">
+        <div class="chh-card__body">
+            <h2 class="chh-h3" style="color:#a52834">Action required</h2>
+            <p class="chh-small mb-0">Email notices are queued by the app. WhatsApp links below open a prefilled message for staff to review and send. They do not send automatically.</p>
+        </div>
+    </section>
+
+    <div class="chh-card" th:if="${!emergencyNotices.isEmpty()}" style="border-left:5px solid #b42332">
+        <div class="table-responsive">
+            <table class="chh-table">
+                <thead><tr><th>Patient</th><th>Reference</th><th>Doctor</th><th>Original appointment</th><th>Reason</th><th>Contact</th></tr></thead>
+                <tbody>
+                <tr th:each="notice : ${emergencyNotices}" style="background:#fff5f5">
+                    <td>
+                        <div class="chh-strong" th:text="${notice.appointment.patientNameDisplay}">Patient</div>
+                        <div class="chh-tiny chh-faint" th:text="${notice.appointment.patientPhoneDisplay}">Phone</div>
+                    </td>
+                    <td class="chh-mono chh-tiny" th:text="${notice.appointment.referenceNo}">CHH-…</td>
+                    <td class="chh-small" th:text="${notice.appointment.doctor != null ? notice.appointment.doctor.name : 'Care team'}">Doctor</td>
+                    <td class="chh-small">
+                        <span th:text="${notice.appointment.appointmentDate}">Date</span><br>
+                        <span th:text="${notice.appointment.slotDisplay}">Time</span>
+                    </td>
+                    <td class="chh-small" th:text="${notice.appointment.rescheduleReason}">Urgent reschedule</td>
+                    <td class="d-flex gap-2">
+                        <a class="chh-btn chh-btn--outline chh-btn--sm"
+                           th:href="'mailto:' + ${notice.appointment.patient.email}"
+                           th:if="${notice.appointment.patient.email != null and !#strings.isEmpty(notice.appointment.patient.email)}">Email</a>
+                        <a class="chh-btn chh-btn--sm" style="background:#16875b;color:#fff"
+                           th:href="${notice.whatsappUrl}" target="_blank" rel="noopener noreferrer"
+                           th:if="${notice.whatsappUrl != null}">WhatsApp</a>
+                        <span class="chh-tiny chh-faint" th:if="${notice.whatsappUrl == null}">No WhatsApp consent/contact</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="chh-card" th:if="${emergencyNotices.isEmpty()}">
+        <div class="chh-card__body chh-muted">No urgent reschedules are waiting.</div>
+    </div>
+</main>
+</body>
+</html>

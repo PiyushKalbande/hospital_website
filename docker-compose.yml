@@ -2,7 +2,7 @@
 #  Local infrastructure for Chinche Hospital.
 #
 #    docker compose up -d          # MySQL 8 + Adminer + Mailpit
-#    ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
+#    mvn -Dspring-boot.run.profiles=mysql spring-boot:run
 #
 #  Volumes persist, so demo data survives restarts.
 # ---------------------------------------------------------------------------
@@ -17,12 +17,12 @@ services:
       - --default-time-zone=+05:30
       - --max_connections=500
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_DATABASE: ${DB_NAME:-chinche_hospital}
       MYSQL_USER: ${DB_USER:-chinche}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-chinche}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     volumes:
       - chinche-mysql-data:/var/lib/mysql
       - ./docs/sql:/docker-entrypoint-initdb.d:ro
@@ -39,7 +39,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
 
   # Local SMTP sink — booking confirmation emails land here during development.
   mailpit:
@@ -47,8 +47,8 @@ services:
     container_name: chinche-mailpit
     restart: unless-stopped
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8080"   # Web UI
+      - "127.0.0.1:1025:1025"   # SMTP
+      - "127.0.0.1:8025:8025"   # Web UI
 
   app:
     build:
@@ -65,16 +65,45 @@ services:
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-chinche_hospital}
       DB_USER: ${DB_USER:-chinche}
-      DB_PASSWORD: ${DB_PASSWORD:-chinche}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-dadakalbande111@gmail.com}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Chinche@2026}
-      RECEPTION_PASSWORD: ${RECEPTION_PASSWORD:-Reception@2026}
+      MAIL_FROM: ${MAIL_FROM:-hospital@example.invalid}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-false}
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
+      WHATSAPP_API_BASE_URL: ${WHATSAPP_API_BASE_URL:-https://graph.facebook.com}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v22.0}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_TEMPLATE_NAME: ${WHATSAPP_TEMPLATE_NAME:-doctor_emergency_reschedule}
+      WHATSAPP_TEMPLATE_LANGUAGE: ${WHATSAPP_TEMPLATE_LANGUAGE:-en_US}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.invalid}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      RECEPTION_PASSWORD: ${RECEPTION_PASSWORD:?Set RECEPTION_PASSWORD in .env}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      AI_ASSISTANT_ENABLED: ${AI_ASSISTANT_ENABLED:-true}
+      AI_ALLOW_UNVERIFIED_KNOWLEDGE: ${AI_ALLOW_UNVERIFIED_KNOWLEDGE:-false}
+      AI_OLLAMA_ENABLED: ${AI_OLLAMA_ENABLED:-false}
+      AI_OLLAMA_BASE_URL: http://ollama:11434
+      AI_OLLAMA_MODEL: ${AI_OLLAMA_MODEL:-qwen2.5:1.5b}
+      AI_OLLAMA_TIMEOUT_SECONDS: ${AI_OLLAMA_TIMEOUT_SECONDS:-120}
+      AI_OLLAMA_CONTEXT_LENGTH: ${AI_OLLAMA_CONTEXT_LENGTH:-4096}
+      AI_OLLAMA_MAX_TOKENS: ${AI_OLLAMA_MAX_TOKENS:-192}
     ports:
-      - "8080:8080"
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8080}:8080"
     profiles: ["full"]
+
+  ollama:
+    image: ollama/ollama:0.6.8
+    container_name: chinche-ollama
+    restart: unless-stopped
+    volumes:
+      - chinche-ollama-data:/root/.ollama
+    profiles: ["ai"]
 
 volumes:
   chinche-mysql-data:
+  chinche-ollama-data:

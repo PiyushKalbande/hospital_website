@@ -49,10 +49,10 @@ public class Patient extends BaseEntity {
 
     /** Consent to receive WhatsApp/SMS reminders about the appointment. */
     @Column(name = "consent_sms")
-    private boolean consentSms = true;
+    private boolean consentSms;
 
     @Column(name = "consent_email")
-    private boolean consentEmail = true;
+    private boolean consentEmail;
 
     @Column(length = 400)
     private String allergies;

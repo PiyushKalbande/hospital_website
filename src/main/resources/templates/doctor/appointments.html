@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{doctor/layout}">
+<head><title layout:fragment="title">My appointments | Chinche Hospital</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2">My appointments</h1><p class="chh-small chh-muted mb-0" th:text="${doctor.name}">Doctor</p></div>
+        <form method="get" th:action="@{/doctor/appointments}" class="d-flex gap-2 align-items-end">
+            <div><label class="chh-label" for="from-date">From</label><input class="chh-input" id="from-date" type="date" name="from" th:value="${from}"></div>
+            <div><label class="chh-label" for="to-date">To</label><input class="chh-input" id="to-date" type="date" name="to" th:value="${to}"></div>
+            <button class="chh-btn chh-btn--outline" type="submit">Filter</button>
+        </form>
+    </div>
+    <div class="chh-card">
+        <div class="table-responsive">
+            <table class="chh-table">
+                <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Phone</th><th>Service</th><th>Mode</th><th>Status</th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${appointments}">
+                    <td class="chh-small" th:text="${a.appointmentDate}">Date</td>
+                    <td class="chh-small" th:text="${a.slotDisplay}">Time</td>
+                    <td class="chh-strong" th:text="${a.patientNameDisplay}">Patient</td>
+                    <td class="chh-small" th:text="${a.patientPhoneDisplay}">Phone</td>
+                    <td class="chh-small" th:text="${a.serviceType.label}">Service</td>
+                    <td class="chh-small" th:text="${a.visitMode.label}">Mode</td>
+                    <td><span class="chh-status" th:classappend="'chh-status--' + ${#strings.toLowerCase(a.status.name())}" th:text="${a.status.label}">Status</span></td>
+                </tr>
+                <tr th:if="${appointments.isEmpty()}"><td colspan="7" class="chh-muted text-center py-4">No appointments in this date range.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

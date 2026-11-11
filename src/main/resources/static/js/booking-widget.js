@@ -159,12 +159,8 @@
     if (back) back.style.visibility = (state.step > 1 && state.step <= TOTAL_STEPS) ? 'visible' : 'hidden';
     if (next) {
       next.disabled = !canAdvance();
-      const label = next.querySelector('span');
-      if (label) {
-        if (state.step === TOTAL_STEPS) label.textContent = t('confirm');
-        else if (state.step === 6) label.textContent = t('newBooking');
-        else label.textContent = t('next');
-      }
+      const label = state.step === TOTAL_STEPS ? t('confirm') : t('next');
+      next.innerHTML = '<span>' + label + '</span> ' + svgIcon('arrow-right');
       next.style.display = state.step === 6 ? 'none' : '';
     }
     if (foot) foot.style.display = state.step === 6 ? 'none' : '';
@@ -473,8 +469,14 @@
       chip.appendChild(el('div', 'chh-datechip__day', d.toLocaleDateString(isMr() ? 'mr-IN' : 'en-IN', { weekday: 'short' })));
       chip.appendChild(el('div', 'chh-datechip__num', String(d.getDate())));
       chip.appendChild(el('div', 'chh-datechip__mon', d.toLocaleDateString(isMr() ? 'mr-IN' : 'en-IN', { month: 'short' })));
+      const reason = (day.reason || '').toLowerCase();
+      const unavailableLabel = reason.includes('hours have ended') ? t('dayEnded')
+        : reason.includes('no clinic hours') ? t('noClinic')
+        : reason.includes('date has passed') ? t('pastDate')
+        : reason.includes('unavailable') || reason.includes('break') ? t('unavailable')
+        : t('full');
       chip.appendChild(el('div', 'chh-datechip__slots',
-        chip.disabled ? (day.reason ? t('full') : '—') : openSlots + ' ' + t('slots')));
+        chip.disabled ? (day.reason ? unavailableLabel : '—') : openSlots + ' ' + t('slots')));
 
       chip.addEventListener('click', () => {
         state.date = day.date;
@@ -492,7 +494,14 @@
     });
 
     const selected = days.find(d => d.date === state.date);
-    if (selected) renderSlots(selected);
+    if (selected) {
+      if (state.slotStart && !(selected.slots || []).some(slot =>
+        slot.start === state.slotStart && slot.available)) {
+        state.slotStart = null;
+        state.slotEnd = null;
+      }
+      renderSlots(selected);
+    }
     renderStepButtonsOnly();
   }
 
@@ -580,6 +589,13 @@
 
   function initStep3() {
     $('#chhDateStrip').addEventListener('click', () => renderStepButtonsOnly());
+    if (window.EventSource) {
+      const events = new EventSource('/api/v1/availability/events');
+      events.addEventListener('availability-changed', () => {
+        if (state.step === 3 && state.doctorId) renderStep3();
+      });
+      events.onerror = () => console.warn('Live availability updates are temporarily disconnected.');
+    }
   }
 
   /* ------------------------------------------------------------- STEP 4 */
@@ -754,6 +770,11 @@
     if (!host || !c) return;
     host.innerHTML = '';
 
+    const printHeading = el('div', 'chh-success__print-heading');
+    printHeading.appendChild(el('div', 'chh-success__print-brand', 'CHINCHE HOSPITAL'));
+    printHeading.appendChild(el('div', 'chh-success__print-title', t('receiptTitle')));
+    host.appendChild(printHeading);
+
     const tick = el('div', 'chh-success__tick');
     tick.innerHTML = svgIcon('check');
     host.appendChild(tick);
@@ -791,8 +812,15 @@
     });
     host.appendChild(grid);
 
-    const actions = el('div', 'chh-row mt-4');
+    const actions = el('div', 'chh-row mt-4 chh-success__actions');
     actions.style.justifyContent = 'center';
+
+    const newBooking = el('a', 'chh-btn chh-btn--ghost', t('newBooking'));
+    newBooking.href = '/book';
+
+    const download = el('a', 'chh-btn chh-btn--primary', t('downloadReceipt'));
+    download.href = API + '/bookings/' + encodeURIComponent(c.referenceNo) + '/receipt.pdf';
+    download.setAttribute('download', c.referenceNo + '-receipt.pdf');
 
     const print = el('a', 'chh-btn chh-btn--outline', t('print'));
     print.href = '#';
@@ -809,7 +837,7 @@
     track.href = c.trackingUrl || '/track';
     track.innerHTML = svgIcon('search-doc') + '<span>Track</span>';
 
-    actions.append(print, wa, track);
+    actions.append(newBooking, download, print, wa, track);
     host.appendChild(actions);
   }
 
@@ -849,7 +877,29 @@
     catch (e) { console.error('Booking data island could not be parsed', e); return; }
 
     state.doctors = data.doctors || [];
+    state.specialities = data.specialities || [];
     state.packages = data.packages || [];
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedDoctor = params.get('doctor');
+    const requestedSpeciality = params.get('speciality');
+    if (requestedDoctor) {
+      const doctor = state.doctors.find(item => item.slug === requestedDoctor);
+      if (doctor) {
+        state.serviceType = 'OPD_CONSULTATION';
+        state.specialityId = doctor.specialityId || null;
+        state.facilityId = doctor.facilityId || null;
+        state.doctorId = Number(doctor.id);
+        state.step = 2;
+      }
+    } else if (requestedSpeciality) {
+      const speciality = state.specialities.find(item => item.slug === requestedSpeciality);
+      if (speciality) {
+        state.serviceType = 'OPD_CONSULTATION';
+        state.specialityId = speciality.id;
+        state.step = 2;
+      }
+    }
 
     initStep1();
     initStep2();

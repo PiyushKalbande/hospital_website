@@ -14,7 +14,11 @@ RUN mvn -B -q clean package -DskipTests
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-RUN groupadd --system chinche && useradd --system --gid chinche --home /app chinche \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system chinche \
+    && useradd --system --gid chinche --home /app chinche \
     && mkdir -p /app/logs && chown -R chinche:chinche /app
 
 COPY --from=build /workspace/target/*.jar app.jar
@@ -27,6 +31,6 @@ USER chinche
 EXPOSE 8080
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=60s --retries=5 \
-  CMD wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"UP"' || exit 1
+  CMD curl --fail --silent http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' || exit 1
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

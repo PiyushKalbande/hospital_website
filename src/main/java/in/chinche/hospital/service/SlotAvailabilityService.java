@@ -49,7 +49,7 @@ public class SlotAvailabilityService {
     private static final ZoneId ZONE = ZoneId.of("Asia/Kolkata");
     private static final List<AppointmentStatus> BLOCKING = List.of(
             AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED, AppointmentStatus.CHECKED_IN,
-            AppointmentStatus.COMPLETED, AppointmentStatus.RESCHEDULED);
+            AppointmentStatus.COMPLETED);
 
     private final DoctorRepository doctors;
     private final DoctorScheduleRepository schedules;
@@ -125,8 +125,8 @@ public class SlotAvailabilityService {
         }
 
         Set<LocalTime> booked = new HashSet<>(appointments.findBookedSlotStarts(doctor.getId(), date, mode, BLOCKING));
-        List<DoctorAttendanceBreak> awayIntervals = attendance.findByDoctorIdAndAttendanceDate(doctor.getId(), date)
-                .map(DoctorAttendance::getBreaks).orElse(List.of()).stream()
+        Optional<DoctorAttendance> attendanceRecord = attendance.findByDoctorIdAndAttendanceDate(doctor.getId(), date);
+        List<DoctorAttendanceBreak> awayIntervals = attendanceRecord.map(DoctorAttendance::getBreaks).orElse(List.of()).stream()
                 .filter(Objects::nonNull)
                 .filter(b -> b.getStartTime() != null && b.getEndTime() != null)
                 .toList();
@@ -148,7 +148,11 @@ public class SlotAvailabilityService {
                 // FIX: Stream ke liye ek 'effectively final' variable banayein
                 final LocalTime currentSlotStart = cursor;
 
-                boolean available = !booked.contains(currentSlotStart)
+                boolean withinRecordedAttendance = attendanceRecord.map(record ->
+                    (record.getArrivalTime() == null || !currentSlotStart.isBefore(record.getArrivalTime()))
+                        && (record.getDepartureTime() == null || !end.isAfter(record.getDepartureTime())))
+                    .orElse(true);
+                boolean available = withinRecordedAttendance && !booked.contains(currentSlotStart)
                     && awayIntervals.stream().noneMatch(b -> overlaps(currentSlotStart, end, b)); // Yahan naya variable use kiya
 
                 if (available && date.isEqual(today()) && LocalDateTime.of(date, end).isBefore(now.plusMinutes(30))) {
@@ -164,10 +168,13 @@ public class SlotAvailabilityService {
 
         slots.sort(Comparator.comparing(SlotDto::start));
         boolean anyOpen = slots.stream().anyMatch(SlotDto::available);
+        boolean hoursEndedToday = date.isEqual(today()) && !slots.isEmpty()
+            && slots.stream().noneMatch(slot -> LocalDateTime.of(date, slot.end()).isAfter(now.plusMinutes(30)));
         String reason = anyOpen
                 ? (awayIntervals.isEmpty() ? null : "Some slots are unavailable during the doctor's break.")
-                : (awayIntervals.isEmpty() ? "All slots fully booked for this date"
-                : "Doctor is unavailable during the recorded break or fully booked.");
+            : (hoursEndedToday ? "Clinic hours have ended for today"
+            : (awayIntervals.isEmpty() ? "All slots fully booked for this date"
+            : "Doctor is unavailable during the recorded break or fully booked."));
         return new DayAvailabilityDto(date, dayName, anyOpen, reason, slots);
     }
 

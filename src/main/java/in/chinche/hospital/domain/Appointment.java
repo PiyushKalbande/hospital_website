@@ -9,14 +9,13 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The booking aggregate — the output of the multi-step widget.
  *
- * <p>The unique constraint on (doctor, date, slot_start, visit_mode) is the
- * last line of defence against double-booking: even under concurrent submits
- * the database rejects the second insert, which the service translates into a
- * friendly "this slot was just taken" response.</p>
+ * <p>A nullable unique key claims doctor slots only while an appointment blocks
+ * booking. Cancelled and no-show rows remain in history without claiming a slot.</p>
  */
 @Entity
 @Table(name = "appointment",
@@ -25,13 +24,13 @@ import java.time.LocalTime;
                 @Index(name = "idx_appt_doctor_date", columnList = "doctor_id,appointment_date"),
                 @Index(name = "idx_appt_patient", columnList = "patient_id"),
                 @Index(name = "idx_appt_status", columnList = "status"),
-                @Index(name = "idx_appt_date", columnList = "appointment_date")
-        },
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_appt_slot",
-                columnNames = {"doctor_id", "appointment_date", "slot_start", "visit_mode"}))
+                @Index(name = "idx_appt_date", columnList = "appointment_date"),
+                @Index(name = "uk_appt_active_slot", columnList = "active_slot_key", unique = true)
+        })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Appointment extends BaseEntity {
+
+    private static final DateTimeFormatter SLOT_KEY_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     /** Human-readable booking reference, e.g. CHH-2026-000184. */
     @Column(name = "reference_no", nullable = false, length = 32, unique = true)
@@ -40,6 +39,12 @@ public class Appointment extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+    @Column(name = "patient_name_snapshot", length = 160)
+    private String patientNameSnapshot;
+
+    @Column(name = "patient_phone_snapshot", length = 30)
+    private String patientPhoneSnapshot;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "doctor_id")
@@ -93,6 +98,12 @@ public class Appointment extends BaseEntity {
     @Column(name = "cancellation_reason", length = 400)
     private String cancellationReason;
 
+        @Column(name = "reschedule_reason", length = 400)
+        private String rescheduleReason;
+
+    @Column(name = "active_slot_key", length = 100)
+    private String activeSlotKey;
+
     @Column(name = "source", length = 30)
     private String source = "WEBSITE";
 
@@ -102,5 +113,30 @@ public class Appointment extends BaseEntity {
     @Transient
     public String getSlotDisplay() {
         return slotStart + " – " + slotEnd;
+    }
+
+    @Transient
+    public String getPatientNameDisplay() {
+        return patientNameSnapshot == null || patientNameSnapshot.isBlank()
+                ? patient == null ? "" : patient.getFullName()
+                : patientNameSnapshot;
+    }
+
+    @Transient
+    public String getPatientPhoneDisplay() {
+        return patientPhoneSnapshot == null || patientPhoneSnapshot.isBlank()
+                ? patient == null ? "" : patient.getPhone()
+                : patientPhoneSnapshot;
+    }
+
+    @PrePersist
+    @PreUpdate
+    void synchronizeActiveSlotKey() {
+        activeSlotKey = doctor == null || appointmentDate == null || slotStart == null || visitMode == null
+                || status == AppointmentStatus.CANCELLED || status == AppointmentStatus.NO_SHOW
+                || status == AppointmentStatus.RESCHEDULED
+                ? null
+                : doctor.getId() + "|" + appointmentDate + "|"
+                        + slotStart.format(SLOT_KEY_TIME_FORMAT) + "|" + visitMode;
     }
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{doctor/layout}">
+<head><title layout:fragment="title">My attendance | Chinche Hospital</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2">My attendance</h1><p class="chh-small chh-muted mb-0" th:text="${doctor.name}">Doctor</p></div>
+        <form method="get" th:action="@{/doctor/attendance}" class="d-flex gap-2 align-items-end">
+            <div><label class="chh-label" for="attendance-date">Date</label><input class="chh-input" id="attendance-date" type="date" name="date" th:value="${selectedDate}"></div>
+            <button class="chh-btn chh-btn--outline" type="submit">View day</button>
+        </form>
+    </div>
+    <section class="chh-card">
+        <div class="chh-card__body">
+            <form method="post" th:action="@{/doctor/attendance}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="date" th:value="${selectedDate}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4"><label class="chh-label" for="arrival">Arrived</label><input class="chh-input" id="arrival" type="time" name="arrival" th:value="${attendance != null ? attendance.arrivalTime : null}"></div>
+                    <div class="col-md-4"><label class="chh-label" for="departure">Left</label><input class="chh-input" id="departure" type="time" name="departure" th:value="${attendance != null ? attendance.departureTime : null}"></div>
+                    <div class="col-md-4"><button class="chh-btn chh-btn--primary w-100" type="submit">Save attendance and breaks</button></div>
+                </div>
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div><h2 class="chh-h3 mb-1">Break intervals</h2><p class="chh-small chh-muted mb-0">If a break overlaps booked patients, you can review and confirm the reschedule in the next step.</p></div>
+                        <button class="chh-btn chh-btn--outline chh-btn--sm" type="button" onclick="addDoctorBreak(this)">+ Add break</button>
+                    </div>
+                    <div class="attendance-breaks">
+                        <div class="row g-2 align-items-end mb-2" th:each="b : ${attendance != null ? attendance.breaks : null}" th:if="${b != null}">
+                            <div class="col-5"><label class="chh-label">From</label><input class="chh-input" type="time" name="breakStart" th:value="${b.startTime}"></div>
+                            <div class="col-5"><label class="chh-label">To</label><input class="chh-input" type="time" name="breakEnd" th:value="${b.endTime}"></div>
+                            <div class="col-2"><button class="chh-btn chh-btn--ghost chh-btn--sm" type="button" onclick="this.closest('.row').remove()">Remove</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3"><label class="chh-label" for="attendance-notes">Notes</label><input class="chh-input" id="attendance-notes" name="notes" maxlength="500" th:value="${attendance != null ? attendance.notes : null}"></div>
+            </form>
+        </div>
+    </section>
+</main>
+<th:block layout:fragment="scripts">
+<script>
+function addDoctorBreak(button) {
+    const row = document.createElement('div');
+    row.className = 'row g-2 align-items-end mb-2';
+    row.innerHTML = '<div class="col-5"><label class="chh-label">From</label><input class="chh-input" type="time" name="breakStart"></div>' +
+        '<div class="col-5"><label class="chh-label">To</label><input class="chh-input" type="time" name="breakEnd"></div>' +
+        '<div class="col-2"><button class="chh-btn chh-btn--ghost chh-btn--sm" type="button" onclick="this.closest(\'.row\').remove()">Remove</button></div>';
+    button.closest('section').querySelector('.attendance-breaks').appendChild(row);
+}
+</script>
+</th:block>
+</body>
+</html>

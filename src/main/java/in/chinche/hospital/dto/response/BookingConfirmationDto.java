@@ -31,7 +31,7 @@ public record BookingConfirmationDto(
         return new BookingConfirmationDto(
                 a.getReferenceNo(),
                 a.getStatus().getLabel(),
-                a.getPatient().getFullName(),
+                a.getPatientNameDisplay(),
                 a.getServiceType().getLabel(),
                 a.getVisitMode().getLabel(),
                 a.getDoctor() == null ? null : a.getDoctor().getName(),

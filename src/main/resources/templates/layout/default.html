@@ -38,10 +38,12 @@
     <span th:text="#{nav.book}">Book appointment</span>
 </a>
 
+<div th:replace="~{fragments/assistant :: widget}"></div>
 <div th:replace="~{fragments/footer :: sprite}"></div>
 
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/assistant.js}"></script>
 <th:block layout:fragment="scripts"></th:block>
 </body>
 </html>

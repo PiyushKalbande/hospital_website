@@ -1,10 +1,12 @@
 package in.chinche.hospital.exception;
 
+import in.chinche.hospital.ai.AssistantUnavailableException;
 import in.chinche.hospital.dto.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +37,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> badRequest(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(ApiResponse.fail(ex.getMessage()));
+    }
+
+    @ExceptionHandler(AssistantUnavailableException.class)
+    public ResponseEntity<ApiResponse<Void>> assistantUnavailable(AssistantUnavailableException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.fail(ex.getReason()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -80,9 +87,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> unexpected(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<?> unexpected(Exception ex, HttpServletRequest request) {
+        if (isDisconnectedEventStream(ex, request)) {
+            log.debug("SSE client disconnected from {} {}.", request.getMethod(), request.getRequestURI());
+            return ResponseEntity.noContent().build();
+        }
         log.error("Unhandled error on {} {}", request.getMethod(), request.getRequestURI(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail("Something went wrong on our side. Our team has been notified."));
+    }
+
+    private static boolean isDisconnectedEventStream(Exception exception, HttpServletRequest request) {
+        String accept = request.getHeader("Accept");
+        boolean eventStream = accept != null && accept.contains("text/event-stream");
+        return eventStream && (exception instanceof java.io.IOException
+                || exception instanceof AsyncRequestNotUsableException
+                || exception.getCause() instanceof java.io.IOException);
     }
 }

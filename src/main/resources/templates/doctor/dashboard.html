@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{doctor/layout}">
+<head><title layout:fragment="title">Doctor dashboard | Chinche Hospital</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="chh-admin__head">
+        <div><h1 class="chh-h2" th:text="'Good day, ' + ${doctor.name}">Doctor dashboard</h1>
+            <p class="chh-small chh-muted mb-0">Your schedule and attendance.</p></div>
+        <a class="chh-btn chh-btn--outline" th:href="@{/doctor/attendance}">Update attendance</a>
+    </div>
+    <section class="chh-card">
+        <div class="chh-card__body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="chh-h3 mb-0">Today's appointments</h2>
+                <a class="chh-btn chh-btn--ghost chh-btn--sm" th:href="@{/doctor/appointments}">View schedule</a>
+            </div>
+            <div class="table-responsive" th:if="${!todayAppointments.isEmpty()}">
+                <table class="chh-table">
+                    <thead><tr><th>Time</th><th>Patient</th><th>Service</th><th>Visit mode</th><th>Status</th></tr></thead>
+                    <tbody><tr th:each="a : ${todayAppointments}">
+                        <td class="chh-small" th:text="${a.slotDisplay}">Time</td>
+                        <td><span class="chh-strong" th:text="${a.patientNameDisplay}">Patient</span><br><span class="chh-tiny chh-faint" th:text="${a.patientPhoneDisplay}">Phone</span></td>
+                        <td class="chh-small" th:text="${a.serviceType.label}">Service</td>
+                        <td class="chh-small" th:text="${a.visitMode.label}">Mode</td>
+                        <td th:text="${a.status.label}">Status</td>
+                    </tr></tbody>
+                </table>
+            </div>
+            <p class="chh-muted mb-0" th:if="${todayAppointments.isEmpty()}">No active appointments are scheduled for today.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

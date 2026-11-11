@@ -18,6 +18,8 @@ public class AppProperties {
     private Seeding seeding = new Seeding();
     private Booking booking = new Booking();
     private Contact contact = new Contact();
+    private Assistant assistant = new Assistant();
+    private WhatsApp whatsapp = new WhatsApp();
 
     @Getter @Setter
     public static class Cache {
@@ -51,5 +53,33 @@ public class AppProperties {
         private String emergency;
         private String email;
         private String mapEmbed;
+    }
+
+    @Getter @Setter
+    public static class Assistant {
+        private boolean enabled = true;
+        private boolean allowUnverifiedKnowledge;
+        private Ollama ollama = new Ollama();
+    }
+
+    @Getter @Setter
+    public static class Ollama {
+        private boolean enabled;
+        private String baseUrl = "http://localhost:11434";
+        private String model = "qwen2.5:1.5b";
+        private int timeoutSeconds = 15;
+        private int contextLength = 4096;
+        private int maxTokens = 192;
+    }
+
+    @Getter @Setter
+    public static class WhatsApp {
+        private boolean enabled;
+        private String baseUrl = "https://graph.facebook.com";
+        private String apiVersion = "v22.0";
+        private String phoneNumberId;
+        private String accessToken;
+        private String templateName = "doctor_emergency_reschedule";
+        private String languageCode = "en_US";
     }
 }

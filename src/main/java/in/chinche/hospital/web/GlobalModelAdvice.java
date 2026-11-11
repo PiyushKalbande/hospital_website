@@ -26,6 +26,7 @@ public class GlobalModelAdvice {
 
     @ModelAttribute
     public void injectGlobalModel(Model model) {
+        model.addAttribute("assistantEnabled", props.getAssistant().isEnabled());
         if (model.containsAttribute("navSpecialities")) return;
         model.addAttribute("navSpecialities", catalogue.allSpecialities());
         model.addAttribute("navFacilities", facilityService.all());

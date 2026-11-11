@@ -24,16 +24,43 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 # → http://localhost:8080
 ```
 
-The `dev` profile boots an in-memory H2 database in MySQL-compatibility mode and
-seeds a complete demo dataset: 4 centres, 18 specialities, 18 doctors with weekly
-schedules, 15 procedures, 12 conditions, 6 health packages, 18 lab tests, blogs,
-announcements, patient stories, testimonials and awards.
+The `dev` profile boots an in-memory H2 database in MySQL-compatibility mode.
+Automatic demo seeding is off by default in every profile. For a disposable demo
+database only, opt in with `SEED_DEMO_DATA=true`; this does not remove demo rows
+from an earlier run. Details are in [`docs/PROJECT-FILES.md`](docs/PROJECT-FILES.md).
+
+From the workspace parent folder (`D:\Projects\chinche`), start the app with:
+
+```powershell
+$env:JAVA_HOME = "C:\path\to\jdk-17"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+mvn -f chinche-hospital/pom.xml -Dspring-boot.run.profiles=dev spring-boot:run
+```
+
+If Java 17 is already selected in your terminal, the first two lines are not
+needed. `-f` points Maven at the child project's `pom.xml`, so the command works
+from the parent directory.
+
+The bilingual **Chinche Care Navigator** is available on public pages. It cites
+hospital information, helps find a department/doctor, and hands booking off to
+the existing widget. Its assumed sample content must be reviewed before
+production; see [`docs/AI-ASSISTANT.md`](docs/AI-ASSISTANT.md). Local Ollama
+generation is optional; without it, the assistant still returns cited source
+excerpts.
 
 ### Option B — MySQL 8 (production-shaped)
 
-For Docker Compose, copy `.env.example` to `.env` and replace the example
-passwords before starting the stack. `.env` is excluded from Git and the Docker
-build context.
+For Docker Compose, copy `.env.example` to `.env` and replace every example
+password before starting the stack. Compose requires database, administrator,
+and reception passwords instead of falling back to known defaults. `.env` is
+excluded from Git and the Docker build context.
+
+Important: Docker Compose reads `.env`; Spring Boot now also imports the optional
+`.env` file when launched with the project folder as its working directory.
+VS Code's **Chinche Hospital - Local MySQL + Ollama** launch profile also loads
+it through `.vscode/launch.json`. Environment variables already present in the
+terminal still take precedence. See [`docs/PROJECT-FILES.md`](docs/PROJECT-FILES.md)
+for what is committed, packaged, test-only, or local-only.
 
 ```bash
 docker compose up -d mysql adminer mailpit     # MySQL :3306, Adminer :8081, Mailpit :8025
@@ -42,20 +69,40 @@ mvn spring-boot:run -Dspring-boot.run.profiles=mysql
 
 ### Option C — everything containerised
 
+Set `DB_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `ADMIN_PASSWORD`, and
+`RECEPTION_PASSWORD` to unique values in `.env` first. The app binds to
+localhost by default; change `APP_BIND_ADDRESS` only when you have configured
+the host firewall/security group and any reverse proxy.
+
 ```bash
 docker compose --profile full up -d --build    # app :8080 + MySQL + Mailpit
 ```
+
+To also run the optional local AI model service, use
+`docker compose --profile full --profile ai up -d --build`, enable
+`AI_OLLAMA_ENABLED=true` in `.env`, then run
+`docker compose exec ollama ollama pull qwen2.5:1.5b`.
+
+The app currently retrieves from its JSON knowledge base; Ollama rewrites an
+answer from retrieved text, but does not ingest PDFs. See
+[`docs/AI-ASSISTANT.md`](docs/AI-ASSISTANT.md) before preparing an evaluation corpus.
 
 ### Staff console
 
 | URL | Role | Username | Password |
 |---|---|---|---|
-| `/admin/login` | Administrator | `admin` | `Chinche@2026` |
-| `/admin/login` | Reception | `reception` | `Reception@2026` |
+| `/admin/login` | Administrator | `admin` | Set `ADMIN_PASSWORD` |
+| `/admin/login` | Reception | `reception` | Set `RECEPTION_PASSWORD` |
 
-Override with `ADMIN_PASSWORD` / `RECEPTION_PASSWORD` environment variables.
-Demo accounts are only created when `chinche.seeding.enabled=true` (on by default
-in `dev`, off in `mysql` unless explicitly enabled).
+Set unique `ADMIN_PASSWORD` / `RECEPTION_PASSWORD` environment variables before
+enabling demo seeding.
+Demo accounts are only created when `chinche.seeding.enabled=true` and the
+database has no speciality rows. All profiles default to seeding off; opt in
+with `SEED_DEMO_DATA=true` only for a disposable database.
+
+Doctor logins are not seeded. An Admin can create a BCrypt-protected, doctor-linked
+account from the selected doctor’s attendance panel. Existing MySQL databases
+must apply the doctor-link migration before launching with Hibernate validation.
 
 ---
 
@@ -142,6 +189,12 @@ POST  {bad phone}               → 400  "Enter a valid 10-digit Indian mobile n
 POST  {malformed JSON}          → 400  (not 500)
 POST /bookings/{ref}/cancel     → 200  slot becomes available again
 ```
+
+Cancelled and no-show appointments keep their history but release the unique
+doctor/time slot key. Existing MySQL installations need the one-time schema
+update in [docs/LIVE-UPDATES.md](docs/LIVE-UPDATES.md) before deploying this fix.
+The admin appointment list and open booking calendars receive live updates
+through SSE; broadcasts are in-memory and therefore single-instance only.
 
 Reference format: `CHH-YYYY-NNNNNN`. Patients can look a booking up at
 `/track` or via the SMS deep link `/track/CHH-2026-000001`.
@@ -264,12 +317,13 @@ Everything is environment-variable driven with sane defaults — see
 | `SERVER_PORT` | `8080` | HTTP port |
 | `DB_HOST` / `DB_PORT` | `localhost` / `3306` | MySQL location |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `chinche_hospital` / `chinche` / `chinche` | credentials |
-| `ADMIN_PASSWORD` | `Chinche@2026` | seeded admin password |
+| `ADMIN_PASSWORD` | operator supplied | seeded admin password |
 | `MAIL_HOST` / `MAIL_PORT` | `localhost` / `1025` | SMTP (Mailpit in dev) |
-| `chinche.seeding.enabled` | `true` (dev) | load the demo dataset |
+| `SEED_DEMO_DATA` | `false` | opt in to demo inserts on an empty catalogue |
 
-Profiles: `dev` (H2, show-sql, devtools, seeding on), `mysql` (MySQL 8, ddl-auto
-`update`, seeding off unless `SEED_DEMO_DATA=true` is set).
+Profiles: `dev` (H2, show-sql, devtools), `mysql` (MySQL 8, ddl-auto `update`).
+Demo seeding is off by default in both; set `SEED_DEMO_DATA=true` only for a
+disposable database.
 
 ---
 
@@ -286,6 +340,8 @@ growth are already in place:
   appointment queries used by the console are already date- and status-scoped.
 - **Statelessness** — the public API holds no session. Horizontal scaling needs only
   sticky sessions for the admin console, or Spring Session backed by Redis.
+- **Live updates** — SSE keeps appointment lists and booking calendars current on
+  one application instance. Multi-instance broadcasts require a shared broker.
 - **Async** — `AsyncConfig` provides a bounded executor for confirmation mail and
   reminders, so a slow SMTP server cannot block a booking response.
 - **Search** — `/api/v1/search/suggest` is a LIKE-based query today; the interface is

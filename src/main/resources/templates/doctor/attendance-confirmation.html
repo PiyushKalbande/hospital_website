@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{doctor/layout}">
+<head><title layout:fragment="title">Confirm attendance update | Chinche Hospital</title></head>
+<body>
+<main layout:fragment="content">
+    <section class="chh-card" style="border:2px solid #b42332;background:#fff7f7">
+        <div class="chh-card__body">
+            <div class="chh-admin__head">
+                <div><h1 class="chh-h2" style="color:#a52834">Review affected patients</h1>
+                    <p class="chh-small chh-muted">This change overlaps active bookings. Nothing is saved until you confirm.</p></div>
+                <span class="chh-status chh-status--cancelled" th:text="${affectedAppointments.size()} + ' affected'">0 affected</span>
+            </div>
+            <div class="chh-alert chh-alert--err mb-3" th:if="${error}" th:text="${error}">Review required</div>
+            <div class="table-responsive mb-3">
+                <table class="chh-table">
+                    <thead><tr><th>Patient</th><th>Reference</th><th>Original slot</th><th>Status</th></tr></thead>
+                    <tbody><tr th:each="a : ${affectedAppointments}">
+                        <td><span class="chh-strong" th:text="${a.patientNameDisplay}">Patient</span><br><span class="chh-tiny" th:text="${a.patientPhoneDisplay}">Phone</span></td>
+                        <td class="chh-mono chh-tiny" th:text="${a.referenceNo}">CHH-…</td>
+                        <td class="chh-small"><span th:text="${a.appointmentDate}">Date</span><br><span th:text="${a.slotDisplay}">Time</span></td>
+                        <td th:text="${a.status.label}">Status</td>
+                    </tr></tbody>
+                </table>
+            </div>
+            <div class="chh-alert chh-alert--err" th:if="${hasCheckedIn}">A patient has already checked in during this interval. Coordinate directly; this portal will not automatically reschedule that patient.</div>
+            <form method="post" th:action="@{/doctor/attendance}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="date" th:value="${date}">
+                <input type="hidden" name="arrival" th:value="${arrival}">
+                <input type="hidden" name="departure" th:value="${departure}">
+                <input type="hidden" name="notes" th:value="${notes}">
+                <input type="hidden" name="confirmAffected" value="true">
+                <input type="hidden" name="approvedAppointmentIds" th:each="a : ${affectedAppointments}" th:value="${a.id}">
+                <input type="hidden" name="breakStart" th:each="start : ${breakStarts}" th:value="${start}">
+                <input type="hidden" name="breakEnd" th:each="end : ${breakEnds}" th:value="${end}">
+                <label class="chh-label" for="emergencyReason">Reason for patient notification</label>
+                <textarea class="chh-input" id="emergencyReason" name="emergencyReason" rows="2" maxlength="400" required></textarea>
+                <p class="chh-tiny chh-muted mt-1">Confirming saves the break/attendance update, releases these slots, and queues email. WhatsApp only sends if the service is configured and the patient consented.</p>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="chh-btn" type="submit" th:disabled="${hasCheckedIn}" style="background:#a52834;color:#fff">Confirm and notify</button>
+                    <a class="chh-btn chh-btn--outline" th:href="@{/doctor/attendance(date=${date})}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

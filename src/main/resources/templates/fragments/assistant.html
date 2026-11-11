@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="chh-assistant" id="chhAssistant" th:fragment="widget"
+         th:if="${assistantEnabled}" th:attr="data-language=${lang} ?: 'en'">
+    <button class="chh-assistant__launcher" id="chhAssistantToggle" type="button"
+            aria-expanded="false" aria-controls="chhAssistantPanel"
+            th:text="#{assistant.launcher}">Ask care assistant</button>
+    <section class="chh-assistant__panel" id="chhAssistantPanel" aria-labelledby="chhAssistantTitle" hidden>
+        <header class="chh-assistant__header">
+            <div>
+                <h2 id="chhAssistantTitle" th:text="#{assistant.title}">Chinche Care Navigator</h2>
+                <p th:text="#{assistant.subtitle}">Hospital information, doctor directory and booking help.</p>
+            </div>
+            <button class="chh-assistant__close" id="chhAssistantClose" type="button"
+                    th:attr="aria-label=#{assistant.close}">×</button>
+        </header>
+        <p class="chh-assistant__notice" th:text="#{assistant.disclaimer}">
+            Information only—not a doctor. Do not share reports or private medical details here.
+        </p>
+        <div class="chh-assistant__messages" id="chhAssistantMessages" role="log"
+             aria-live="polite" aria-relevant="additions"></div>
+        <p class="chh-assistant__status" id="chhAssistantStatus" aria-live="polite"></p>
+        <form class="chh-assistant__form" id="chhAssistantForm">
+            <label class="sr-only" for="chhAssistantInput" th:text="#{assistant.input.label}">Ask a question</label>
+            <textarea class="chh-input" id="chhAssistantInput" name="message" rows="2"
+                      maxlength="500" required th:placeholder="#{assistant.placeholder}"></textarea>
+            <button class="chh-btn chh-btn--primary" id="chhAssistantSend" type="submit"
+                    th:text="#{assistant.send}">Send</button>
+        </form>
+    </section>
+</section>
+</body>
+</html>

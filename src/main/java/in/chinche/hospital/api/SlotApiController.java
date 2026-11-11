@@ -3,6 +3,7 @@ package in.chinche.hospital.api;
 import in.chinche.hospital.domain.enums.VisitMode;
 import in.chinche.hospital.dto.response.ApiResponse;
 import in.chinche.hospital.dto.response.DayAvailabilityDto;
+import in.chinche.hospital.service.AppointmentUpdatePublisher;
 import in.chinche.hospital.service.SlotAvailabilityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,7 +12,9 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +32,12 @@ import java.util.Map;
 public class SlotApiController {
 
     private final SlotAvailabilityService availability;
+    private final AppointmentUpdatePublisher appointmentUpdates;
+
+    @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter events() {
+        return appointmentUpdates.subscribeAvailability();
+    }
 
     @Operation(summary = "Bookable days and slots for a doctor")
     @GetMapping("/doctors/{doctorId}")

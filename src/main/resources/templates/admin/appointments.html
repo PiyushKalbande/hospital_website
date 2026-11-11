@@ -5,6 +5,7 @@
 <head><title layout:fragment="title">Appointments | Chinche Hospital Admin</title></head>
 <body>
 <main layout:fragment="content">
+    <div id="appointmentResults" th:fragment="appointmentResults">
     <div class="chh-admin__head">
         <div><h1 class="chh-h2">Appointments</h1>
             <p class="chh-small chh-muted mb-0"><b th:text="${appointments.totalElements}">0</b> matching bookings.</p></div>
@@ -37,8 +38,8 @@
                 <tbody>
                 <tr th:each="a : ${appointments.content}">
                     <td class="chh-mono chh-tiny" th:text="${a.referenceNo}">CHH-…</td>
-                    <td><div class="chh-strong" th:text="${a.patient.fullName}">Name</div>
-                        <div class="chh-tiny chh-faint" th:text="${a.patient.phone}">Phone</div></td>
+                    <td><div class="chh-strong" th:text="${a.patientNameDisplay}">Name</div>
+                        <div class="chh-tiny chh-faint" th:text="${a.patientPhoneDisplay}">Phone</div></td>
                     <td class="chh-small" th:text="${a.doctor != null} ? ${a.doctor.name} : '—'">Doctor</td>
                     <td class="chh-small chh-num" th:text="${a.appointmentDate}">Date</td>
                     <td class="chh-small chh-num" th:text="${a.slotDisplay}">Slot</td>
@@ -48,7 +49,9 @@
                     <td><span class="chh-status" th:classappend="'chh-status--' + ${#strings.toLowerCase(a.status.name())}"
                               th:text="${a.status.label}">Status</span></td>
                     <td>
-                        <form th:action="@{'/admin/appointments/' + ${a.id} + '/status'}" method="post" class="d-flex gap-1">
+                        <form th:action="@{'/admin/appointments/' + ${a.id} + '/status'}"
+                              th:attr="data-live-action=@{'/admin/api/appointments/' + ${a.id} + '/status'}"
+                              method="post" class="d-flex gap-1">
                             <select class="chh-select" name="status" style="padding:5px 28px 5px 9px;font-size:.75rem;width:auto">
                                 <option th:each="s : ${statuses}" th:value="${s.name()}" th:selected="${s == a.status}"
                                         th:text="${s.label}">Status</option>
@@ -72,6 +75,10 @@
             <a th:if="${!appointments.last}" th:href="@{/admin/appointments(status=${status},date=${date},page=${appointments.number + 1})}">Next</a>
         </div>
     </nav>
+    </div>
 </main>
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/admin-appointments.js}"></script>
+</th:block>
 </body>
 </html>

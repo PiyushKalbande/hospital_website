@@ -43,6 +43,10 @@ public class BookingWidgetDataService {
         I18N_KEYS.put("afternoon", "booking.slot.afternoon");
         I18N_KEYS.put("evening", "booking.slot.evening");
         I18N_KEYS.put("full", "booking.slot.unavailable");
+        I18N_KEYS.put("dayEnded", "booking.slot.ended");
+        I18N_KEYS.put("noClinic", "booking.slot.no.clinic");
+        I18N_KEYS.put("pastDate", "booking.slot.past");
+        I18N_KEYS.put("unavailable", "booking.slot.unavailable.reason");
         I18N_KEYS.put("doctor", "nav.doctors");
         I18N_KEYS.put("choosePackage", "nav.packages");
         I18N_KEYS.put("summaryTitle", "booking.summary");
@@ -56,6 +60,8 @@ public class BookingWidgetDataService {
         I18N_KEYS.put("reference", "booking.success.reference");
         I18N_KEYS.put("successNote", "booking.success.note");
         I18N_KEYS.put("print", "booking.success.print");
+        I18N_KEYS.put("downloadReceipt", "booking.success.download");
+        I18N_KEYS.put("receiptTitle", "booking.success.receipt");
         I18N_KEYS.put("whatsapp", "booking.success.whatsapp");
         I18N_KEYS.put("years", "common.experience");
         I18N_KEYS.put("teleconsult", "common.teleconsult");
@@ -81,6 +87,7 @@ public class BookingWidgetDataService {
 
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("doctors", doctorRows);
+        root.put("specialities", catalogue.allSpecialityDtos());
         root.put("packages", packageRows);
         root.put("serviceTypes", Arrays.stream(ServiceType.values()).map(st -> Map.of(
                 "value", st.name(),

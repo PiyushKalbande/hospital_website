@@ -29,6 +29,10 @@
                 <svg><use href="/img/icons/sprite.svg#dashboard"></use></svg> Dashboard</a></li>
             <li><a th:href="@{/admin/appointments}" th:classappend="${activeView == 'appointments'} ? 'active'">
                 <svg><use href="/img/icons/sprite.svg#calendar"></use></svg> Appointments</a></li>
+            <li><a th:href="@{/admin/appointment-emergencies}"
+                   th:classappend="${activeView == 'appointment-emergencies'} ? 'active'"
+                   th:style="${activeView == 'appointment-emergencies'} ? 'color:#fff;background:#a52834' : 'color:#ffc2c6'">
+                <svg><use href="/img/icons/sprite.svg#feedback"></use></svg> Urgent reschedules</a></li>
             <li><a th:href="@{/admin/doctors}" th:classappend="${activeView == 'doctors'} ? 'active'">
                 <svg><use href="/img/icons/sprite.svg#user"></use></svg> Doctors</a></li>
             <li><a th:href="@{/admin/catalogue}" th:classappend="${activeView == 'catalogue'} ? 'active'">

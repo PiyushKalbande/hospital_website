@@ -27,9 +27,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>Double-booking is prevented in two independent ways:</p>
  * <ol>
  *   <li>An availability re-check inside this transaction (friendly error, fast path).</li>
- *   <li>The unique constraint {@code uk_appt_slot} on (doctor, date, slot_start, visit_mode)
- *       — the database is the final arbiter under concurrent submits, and the resulting
- *       {@link DataIntegrityViolationException} is converted into the same friendly error.</li>
+ *   <li>The unique active-slot key — the database is the final arbiter under concurrent submits,
+ *       and the resulting {@link DataIntegrityViolationException} is converted into the same
+ *       friendly error.</li>
  * </ol>
  */
 @Slf4j
@@ -45,6 +45,7 @@ public class BookingService {
     private final HealthPackageRepository packages;
     private final SlotAvailabilityService availability;
     private final NotificationService notifications;
+    private final AppointmentUpdatePublisher appointmentUpdates;
     private final AppProperties props;
 
     @Transactional
@@ -79,6 +80,8 @@ public class BookingService {
         Appointment appointment = Appointment.builder()
                 .referenceNo(nextReference())
                 .patient(patient)
+                .patientNameSnapshot(req.patientName().trim())
+                .patientPhoneSnapshot(req.patientPhone().trim())
                 .doctor(doctor)
                 .facility(facility)
                 .speciality(speciality)
@@ -113,6 +116,7 @@ public class BookingService {
 
         // Fire-and-forget: never let a mail server hiccup fail a confirmed booking.
         notifications.sendBookingConfirmation(appointment);
+        appointmentUpdates.publishAppointmentChangeAfterCommit();
 
         return BookingConfirmationDto.from(appointment);
     }
@@ -134,7 +138,38 @@ public class BookingService {
         a.setCancellationReason(reason == null || reason.isBlank() ? "Cancelled by patient" : reason.trim());
         appointments.save(a);
         notifications.sendCancellation(a);
+        appointmentUpdates.publishAppointmentChangeAfterCommit();
         return BookingConfirmationDto.from(a);
+    }
+
+    @Transactional
+    public void updateStatus(Long id, AppointmentStatus status, String note) {
+        Appointment appointment = appointments.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", id));
+        boolean statusChanged = appointment.getStatus() != status;
+        if (note != null && !note.isBlank()) appointment.setInternalNotes(note.trim());
+        if (!statusChanged && (note == null || note.isBlank())) return;
+
+        if (statusChanged && isSlotBlocking(status) && !isSlotBlocking(appointment.getStatus())
+                && appointment.getDoctor() != null
+                && !availability.isSlotOpen(appointment.getDoctor().getId(), appointment.getAppointmentDate(),
+                appointment.getSlotStart(), appointment.getVisitMode())) {
+            throw new SlotUnavailableException("That slot is already booked. Choose a different appointment status.");
+        }
+        appointment.setStatus(status);
+        try {
+            Appointment saved = appointments.saveAndFlush(appointment);
+            if (statusChanged) {
+                notifications.sendStatusUpdate(saved);
+                appointmentUpdates.publishAppointmentChangeAfterCommit();
+            }
+        } catch (DataIntegrityViolationException ex) {
+            if (statusChanged && isSlotBlocking(status)) {
+                throw new SlotUnavailableException(
+                        "That slot is already booked. Choose a different appointment status.");
+            }
+            throw ex;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -187,6 +222,11 @@ public class BookingService {
                 .filter(m -> m != null && m > 0)
                 .findFirst()
                 .orElse(configured);
+    }
+
+    private boolean isSlotBlocking(AppointmentStatus status) {
+        return status != AppointmentStatus.CANCELLED && status != AppointmentStatus.NO_SHOW
+                && status != AppointmentStatus.RESCHEDULED;
     }
 
     private BigDecimal resolveAmount(BookingRequest req, Doctor doctor, HealthPackage pkg) {

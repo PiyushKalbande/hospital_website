@@ -7,6 +7,8 @@
 #    mysql  -> MySQL 8 (production / staging). Credentials via env vars.
 # ---------------------------------------------------------------------------
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: chinche-hospital
   profiles:
@@ -60,8 +62,8 @@ spring:
     username: ${MAIL_USER:}
     password: ${MAIL_PASSWORD:}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -102,6 +104,26 @@ chinche:
     emergency: "108 / +91 70836 82563"
     email: "dadakalbande111@gmail.com"
     map-embed: "https://www.google.com/maps?q=Katol,+Nagpur,+Maharashtra+441302&output=embed"
+  mail:
+    from: ${MAIL_FROM:dadakalbande111@gmail.com}
+  whatsapp:
+    enabled: ${WHATSAPP_ENABLED:false}
+    base-url: ${WHATSAPP_API_BASE_URL:https://graph.facebook.com}
+    api-version: ${WHATSAPP_API_VERSION:v22.0}
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    access-token: ${WHATSAPP_ACCESS_TOKEN:}
+    template-name: ${WHATSAPP_TEMPLATE_NAME:doctor_emergency_reschedule}
+    language-code: ${WHATSAPP_TEMPLATE_LANGUAGE:en_US}
+  assistant:
+    enabled: ${AI_ASSISTANT_ENABLED:true}
+    allow-unverified-knowledge: ${AI_ALLOW_UNVERIFIED_KNOWLEDGE:false}
+    ollama:
+      enabled: ${AI_OLLAMA_ENABLED:false}
+      base-url: ${AI_OLLAMA_BASE_URL:http://localhost:11434}
+      model: ${AI_OLLAMA_MODEL:qwen2.5:1.5b}
+      timeout-seconds: ${AI_OLLAMA_TIMEOUT_SECONDS:120}
+      context-length: ${AI_OLLAMA_CONTEXT_LENGTH:4096}
+      max-tokens: ${AI_OLLAMA_MAX_TOKENS:192}
 
 management:
   endpoints:

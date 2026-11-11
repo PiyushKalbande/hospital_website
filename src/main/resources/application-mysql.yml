@@ -21,7 +21,6 @@ spring:
       max-lifetime: 1200000
       connection-test-query: SELECT 1
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: false
     hibernate:
       # Use `validate` once db/migration is authoritative in production.
@@ -32,6 +31,8 @@ spring:
 chinche:
   seeding:
     enabled: ${SEED_DEMO_DATA:false}
+  assistant:
+    allow-unverified-knowledge: ${AI_ALLOW_UNVERIFIED_KNOWLEDGE:false}
   web:
     resources:
       chain:
