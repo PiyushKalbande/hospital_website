@@ -1,0 +1,9 @@
+:80 {
+    basic_auth {
+        {$SITE_ACCESS_USER} {$SITE_PASSWORD_HASH}
+    }
+
+    reverse_proxy app:8080 {
+        header_up X-Forwarded-Proto https
+    }
+}

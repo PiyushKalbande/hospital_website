@@ -92,9 +92,42 @@ services:
       AI_OLLAMA_TIMEOUT_SECONDS: ${AI_OLLAMA_TIMEOUT_SECONDS:-120}
       AI_OLLAMA_CONTEXT_LENGTH: ${AI_OLLAMA_CONTEXT_LENGTH:-4096}
       AI_OLLAMA_MAX_TOKENS: ${AI_OLLAMA_MAX_TOKENS:-192}
-    ports:
-      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8080}:8080"
     profiles: ["full"]
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: chinche-caddy
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      SITE_ACCESS_USER: ${SITE_ACCESS_USER:-demo}
+      SITE_ACCESS_PASSWORD: ${SITE_ACCESS_PASSWORD:-}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ -z "$$SITE_ACCESS_PASSWORD" ]; then
+          echo "Set SITE_ACCESS_PASSWORD in .env before starting the demo proxy." >&2
+          exit 1
+        fi
+        export SITE_PASSWORD_HASH="$$(caddy hash-password --plaintext "$$SITE_ACCESS_PASSWORD")"
+        unset SITE_ACCESS_PASSWORD
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    profiles: ["full", "tunnel"]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: chinche-cloudflared
+    restart: unless-stopped
+    depends_on:
+      - caddy
+    command: ["tunnel", "--no-autoupdate", "--url", "http://caddy:80"]
+    profiles: ["tunnel"]
 
   ollama:
     image: ollama/ollama:0.6.8

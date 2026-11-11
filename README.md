@@ -70,13 +70,26 @@ mvn spring-boot:run -Dspring-boot.run.profiles=mysql
 ### Option C — everything containerised
 
 Set `DB_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `ADMIN_PASSWORD`, and
-`RECEPTION_PASSWORD` to unique values in `.env` first. The app binds to
-localhost by default; change `APP_BIND_ADDRESS` only when you have configured
-the host firewall/security group and any reverse proxy.
+`RECEPTION_PASSWORD` to unique values in `.env` first. Set
+`SITE_ACCESS_PASSWORD` to the password you want viewers to enter. The app is
+only reachable through the local Caddy proxy, which prompts for this password.
+The proxy binds to localhost by default.
 
 ```bash
 docker compose --profile full up -d --build    # app :8080 + MySQL + Mailpit
 ```
+
+For a temporary, publicly shareable HTTPS link without a domain or inbound
+firewall ports, also start the Cloudflare Quick Tunnel:
+
+```bash
+docker compose --profile full --profile tunnel up -d --build
+docker compose logs cloudflared
+```
+
+Open the `https://....trycloudflare.com` address printed in the tunnel logs.
+Cloudflare relays visitor traffic; Quick Tunnel addresses are temporary and can
+change after a restart. Do not use this demo setup for real patient data.
 
 To also run the optional local AI model service, use
 `docker compose --profile full --profile ai up -d --build`, enable
